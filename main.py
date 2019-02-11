@@ -2,6 +2,7 @@ import tensorflow as tf
 import numpy as np
 import random
 from DataInput import DataInput
+from teacherModel import Teacher
 import os
 import time
 import pdb
@@ -17,6 +18,21 @@ dataset_path = "./"
 
 class Resnet(object):
 
+    def define_teacher(self, images_placeholder, labels_placeholder, phase_train, global_step, sess):
+
+        """
+            1. Train teacher prior to student so that knowledge from teacher can be transferred to train student.
+            2. Teacher object is trained by importing weights from a pretrained vgg 16 network
+            3. Mentor object is a network trained from scratch. We did not find the pretrained network with the same architecture for cifar10.
+               Thus, trained the network from scratch on cifar10
+
+        """
+        mentor = Teacher()
+        mentor_data_dict = mentor.build(images_placeholder, FLAGS.num_classes, FLAGS.temp_softmax, phase_train)
+        init = tf.global_variables_initializer()
+        sess.run(init)
+
+
     def main(self, _):
         with tf.Graph().as_default():
             print("test whether to use gpu")
@@ -24,7 +40,7 @@ class Resnet(object):
 
             # This line allows the code to use only sufficient memory and does not block entire GPU
             config = tf.ConfigProto(gpu_options=tf.GPUOptions(allow_growth=True))
-            # config = tf.ConfigProto()
+            config = tf.ConfigProto()
             config.gpu_options.allocator_type = 'BFC'
 
             # set the seed so that we have same loss values and initializations for every run.

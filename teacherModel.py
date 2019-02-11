@@ -8,7 +8,7 @@ from tensorflow.python.keras.layers import BatchNormalization
 from tensorflow.python.keras import backend as K
 
 
-class Mentee(object):
+class Teacher(object):
 
     def __init__(self, num_channels, trainable=True):
         self.trainable = trainable
