@@ -40,8 +40,7 @@ class Resnet(object):
 
             # This line allows the code to use only sufficient memory and does not block entire GPU
             config = tf.ConfigProto(gpu_options=tf.GPUOptions(allow_growth=True))
-            config = tf.ConfigProto()
-            config.gpu_options.allocator_type = 'BFC'
+
 
             # set the seed so that we have same loss values and initializations for every run.
             tf.set_random_seed(seed)
@@ -59,6 +58,9 @@ class Resnet(object):
             labels_placeholder = tf.placeholder(tf.int32,
                                                 shape=(FLAGS.batch_size))
 
+            config = tf.ConfigProto()
+            config.gpu_options.allocator_type = 'BFC'
+
             sess = tf.Session(config=config)
             coord = tf.train.Coordinator()
             threads = tf.train.start_queue_runners(sess=sess, coord=coord)
@@ -68,6 +70,8 @@ class Resnet(object):
             print("NUM_ITERATIONS: " + str(NUM_ITERATIONS))
             print("learning_rate: " + str(FLAGS.learning_rate))
             print("batch_size: " + str(FLAGS.batch_size))
+
+
 
             #if FLAGS.teacher:
             #    self.define_teacher(images_placeholder, labels_placeholder, phase_train, global_step, sess)
