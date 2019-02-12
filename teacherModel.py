@@ -32,14 +32,11 @@ class Teacher(object):
             batchNorm = BatchNormalization(axis = -1, name= 'block_conv1_BatchNormal')(nInputPlane)
             print(batchNorm)
             relu = tf.nn.relu(batchNorm, name='block_conv1_relu')
-
-            kernel = tf.Variable(tf.truncated_normal([3, 3, nInputPlane, nOutputPlane], dtype=tf.float32, stddev=1e-2, seed=seed), trainable=self.trainable, name='block_conv1_kernel')
-            conv = tf.nn.conv2d(relu, kernel, [1, 1, 1, 1], padding='SAME')
-            biases = tf.Variable(tf.constant(0.0, shape=[nOutputPlane], dtype=tf.float32),
-                                 trainable=self.trainable, name='block_conv1_biases')
+            out = self.Convolution(relu, nInputPlane, nOutputPlane)
+            print(out)
 
 
-            out = tf.nn.bias_add(conv, biases, name = scope)
+
 
         #with tf.name_scope('block_conv2') as scope:
         #    batchNorm = BatchNormalization(axis = -1, name= 'block_conv1_BatchNormal')(block_conv1_out)
@@ -52,6 +49,7 @@ class Teacher(object):
         #self.basic_block(nInputPlane, nOutputPlane)
         conv1_out = self.Convolution(rgb, self.num_channels, nStages[0])
         print(conv1_out)
+        self.basic_block(nStages[0], nStages[1])
 
 
 
