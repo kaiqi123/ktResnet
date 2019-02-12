@@ -46,7 +46,7 @@ class Teacher(object):
         nStages = [16, 16 * k, 32 * k, 64 * k]
 
         #self.basic_block(nInputPlane, nOutputPlane)
-        conv1_out = self.Convolution(rgb, self.num_channels, 16, seed)
+        conv1_out = self.Convolution(rgb, self.num_channels, nStages[0], seed)
         print(conv1_out)
 
 
