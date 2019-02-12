@@ -42,17 +42,27 @@ class Teacher(object):
             print(out2)
         return out2
 
+    def layer(self, imgInput, nInputPlane, nOutputPlane, n, stride):
+
+        block1 = self.basic_block(imgInput, nInputPlane, nOutputPlane, stride)
+        block = self.basic_block(block1, nOutputPlane, nOutputPlane, 1)
+        for i in range(n-2):
+            block = self.basic_block(block, nOutputPlane, nOutputPlane, 1)
+        return block
+
+
 
     def build_teacher_model(self, rgb, num_classes):
 
         k = 10
         nStages = [16, 16 * k, 32 * k, 64 * k]
+        n = 3
 
         conv1 = self.Convolution(rgb, self.num_channels, nStages[0], 1)
         print(conv1)
-        group1 = self.basic_block(conv1, nStages[0], nStages[1], 1)
-        group2 = self.basic_block(group1, nStages[1], nStages[2], 2)
-        group3 = self.basic_block(group2, nStages[2], nStages[3], 2)
+        group1 = self.layer(conv1, nStages[0], nStages[1], n, 1)
+        #group2 = self.basic_block(group1, nStages[1], nStages[2], 2)
+        #group3 = self.basic_block(group2, nStages[2], nStages[3], 2)
 
 
 
