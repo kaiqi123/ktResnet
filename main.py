@@ -132,7 +132,7 @@ if __name__ == '__main__':
         default=10
     )
     parser.add_argument(
-        '--NUM_EXAMPLES_PER_EPOCH_FOR_TRAIN',
+        '--num_examples_per_epoch_for_train',
         type=int,
         default=50000
     )
