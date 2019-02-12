@@ -40,6 +40,7 @@ class Teacher(object):
             dropout = tf.nn.dropout(relu, 0.5, seed=self.seed)
             out2 = self.Convolution(dropout, nOutputPlane, nOutputPlane, 1)
             print(out2)
+        return out2
 
 
     def build_teacher_model(self, rgb, num_classes):
@@ -49,7 +50,9 @@ class Teacher(object):
 
         conv1 = self.Convolution(rgb, self.num_channels, nStages[0], 1)
         print(conv1)
-        self.basic_block(conv1, nStages[0], nStages[1], 1)
+        group1 = self.basic_block(conv1, nStages[0], nStages[1], 1)
+        group2 = self.basic_block(group1, nStages[1], nStages[2], 2)
+        group3 = self.basic_block(group2, nStages[2], nStages[3], 2)
 
 
 
