@@ -73,7 +73,7 @@ class Teacher(object):
         batchNorm = BatchNormalization(axis=-1, name='BatchNormal')(group3)
         relu = tf.nn.relu(batchNorm, name='relu')
         print(relu)
-        averagePool = tf.nn.avg_pool(relu, ksize=[1, 8, 8, 1], strides=[1, 1, 1, 1], padding='SAME', name='averagePool')
+        averagePool = tf.nn.avg_pool(relu, ksize=[1, 8, 8, 1], strides=[1, 1, 1, 1], padding='VALID', name='averagePool')
         print(averagePool)
         fc = self.FullyConnect(averagePool, num_classes)
         print(fc)
