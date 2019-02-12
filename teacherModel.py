@@ -30,13 +30,17 @@ class Teacher(object):
 
         with tf.name_scope('block_conv1') as scope:
             batchNorm = BatchNormalization(axis = -1, name= 'BatchNormal')(imgInput)
-            print(batchNorm)
             relu = tf.nn.relu(batchNorm, name='relu')
-            out = self.Convolution(relu, nInputPlane, nOutputPlane)
-            print(out)
+            out1 = self.Convolution(relu, nInputPlane, nOutputPlane)
+            print(out1)
 
-        #with tf.name_scope('block_conv2') as scope:
-        #    batchNorm = BatchNormalization(axis = -1, name= 'block_conv1_BatchNormal')(block_conv1_out)
+        with tf.name_scope('block_conv2') as scope:
+            batchNorm = BatchNormalization(axis = -1, name= 'block_conv1_BatchNormal')(out1)
+            relu = tf.nn.relu(batchNorm, name='relu')
+            dropout = tf.nn.dropout(relu, 0.5, seed=self.seed)
+            out2 = self.Convolution(dropout, nOutputPlane, nOutputPlane)
+            print(out2)
+
 
     def build_teacher_model(self, rgb, num_classes):
 
