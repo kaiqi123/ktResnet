@@ -18,7 +18,7 @@ dataset_path = "./"
 
 class Resnet(object):
 
-    def define_teacher(self, images_placeholder, labels_placeholder, phase_train, global_step, sess):
+    def define_teacher(self, images_placeholder, labels_placeholder, global_step, sess):
 
         """
             1. Train teacher prior to student so that knowledge from teacher can be transferred to train student.
@@ -28,7 +28,7 @@ class Resnet(object):
         """
         mentor = Teacher(FLAGS.num_channels)
 
-        mentor.build_teacher_model(images_placeholder, FLAGS.num_classes, seed, phase_train)
+        mentor.build_teacher_model(images_placeholder, FLAGS.num_classes, seed)
         init = tf.global_variables_initializer()
         sess.run(init)
 
@@ -63,14 +63,14 @@ class Resnet(object):
             coord = tf.train.Coordinator()
             threads = tf.train.start_queue_runners(sess=sess, coord=coord)
             global_step = tf.Variable(0, name='global_step', trainable=False)
-            phase_train = tf.placeholder(tf.bool, name='phase_train')
+            #phase_train = tf.placeholder(tf.bool, name='phase_train')
 
             print("NUM_ITERATIONS: " + str(NUM_ITERATIONS))
             print("learning_rate: " + str(FLAGS.learning_rate))
             print("batch_size: " + str(FLAGS.batch_size))
 
             if FLAGS.teacher:
-                self.define_teacher(images_placeholder, labels_placeholder, phase_train, global_step, sess)
+                self.define_teacher(images_placeholder, labels_placeholder, global_step, sess)
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
