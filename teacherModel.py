@@ -61,11 +61,9 @@ class Teacher(object):
                 block = self.basic_block(block, nOutputPlane, nOutputPlane, 1)
         return block
 
-    def build_teacher_model(self, rgb, num_classes):
+    def build_teacher_model(self, rgb, num_classes, k, n):
 
-        k = 10
         nStages = [16, 16 * k, 32 * k, 64 * k]
-        n = 3
 
         conv1 = self.Convolution(rgb, self.num_channels, nStages[0], 1)
         print(conv1)

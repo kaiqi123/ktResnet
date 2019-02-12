@@ -13,16 +13,17 @@ from tensorflow.python.client import device_lib
 
 tf.reset_default_graph()
 NUM_ITERATIONS = 7820
+TeacherModel_K = 10
+TeacherModel_N = 3
 SEED = 1234
-dataset_path = "./"
+Dataset_Path = "./"
 
 class Resnet(object):
 
     def define_teacher(self, images_placeholder, labels_placeholder, global_step, sess):
 
         mentor = Teacher(FLAGS.num_channels, SEED)
-
-        mentor.build_teacher_model(images_placeholder, FLAGS.num_classes)
+        mentor.build_teacher_model(images_placeholder, FLAGS.num_classes, TeacherModel_K, TeacherModel_N)
         init = tf.global_variables_initializer()
         sess.run(init)
 
@@ -37,11 +38,11 @@ class Resnet(object):
             # set the seed so that we have same loss values and initializations for every run.
             tf.set_random_seed(SEED)
 
-            data_input_train = DataInput(dataset_path, FLAGS.train_dataset, FLAGS.batch_size,
+            data_input_train = DataInput(Dataset_Path, FLAGS.train_dataset, FLAGS.batch_size,
                                          FLAGS.num_training_examples, FLAGS.image_width, FLAGS.image_height,
                                          FLAGS.num_channels, SEED, FLAGS.datasetName)
 
-            data_input_test = DataInput(dataset_path, FLAGS.test_dataset, FLAGS.batch_size, FLAGS.num_testing_examples,
+            data_input_test = DataInput(Dataset_Path, FLAGS.test_dataset, FLAGS.batch_size, FLAGS.num_testing_examples,
                                         FLAGS.image_width, FLAGS.image_height, FLAGS.num_channels, SEED, FLAGS.datasetName)
 
             images_placeholder = tf.placeholder(tf.float32,
