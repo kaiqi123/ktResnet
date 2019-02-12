@@ -11,6 +11,7 @@ from tensorflow.python import debug as tf_debug
 import argparse
 from tensorflow.python.client import device_lib
 
+
 tf.reset_default_graph()
 NUM_ITERATIONS = 78200
 TeacherModel_K = 10
