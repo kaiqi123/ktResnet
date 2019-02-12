@@ -44,7 +44,7 @@ class Teacher(object):
 
     def build_teacher_model(self, rgb, num_classes):
 
-        k = 2
+        k = 10
         nStages = [16, 16 * k, 32 * k, 64 * k]
 
         #self.basic_block(nInputPlane, nOutputPlane)
