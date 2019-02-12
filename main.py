@@ -25,13 +25,12 @@ class Resnet(object):
             2. Teacher object is trained by importing weights from a pretrained vgg 16 network
             3. Mentor object is a network trained from scratch. We did not find the pretrained network with the same architecture for cifar10.
                Thus, trained the network from scratch on cifar10
-
         """
-        mentor = Teacher()
-        mentor_data_dict = mentor.build(images_placeholder, FLAGS.num_classes, FLAGS.temp_softmax, phase_train)
+        mentor = Teacher(FLAGS.num_channels)
+
+        mentor.build_teacher_model(images_placeholder, FLAGS.num_classes, seed, phase_train)
         init = tf.global_variables_initializer()
         sess.run(init)
-
 
     def main(self, _):
         with tf.Graph().as_default():
@@ -40,7 +39,6 @@ class Resnet(object):
 
             # This line allows the code to use only sufficient memory and does not block entire GPU
             config = tf.ConfigProto(gpu_options=tf.GPUOptions(allow_growth=True))
-
 
             # set the seed so that we have same loss values and initializations for every run.
             tf.set_random_seed(seed)
@@ -61,7 +59,6 @@ class Resnet(object):
             config = tf.ConfigProto()
             config.gpu_options.allocator_type = 'BFC'
 
-
             sess = tf.Session(config=config)
             coord = tf.train.Coordinator()
             threads = tf.train.start_queue_runners(sess=sess, coord=coord)
@@ -72,10 +69,8 @@ class Resnet(object):
             print("learning_rate: " + str(FLAGS.learning_rate))
             print("batch_size: " + str(FLAGS.batch_size))
 
-
-
-            #if FLAGS.teacher:
-            #    self.define_teacher(images_placeholder, labels_placeholder, phase_train, global_step, sess)
+            if FLAGS.teacher:
+                self.define_teacher(images_placeholder, labels_placeholder, phase_train, global_step, sess)
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()

@@ -15,7 +15,7 @@ class Teacher(object):
         self.parameters = []
         self.num_channels = num_channels
 
-    def basic_block(self, nInputPlane, nOutputPlane, seed, train_mode):
+    def basic_block(self, nInputPlane, nOutputPlane, train_mode=None):
 
         print("wide_basic")
 
@@ -27,8 +27,23 @@ class Teacher(object):
             conv = tf.nn.conv2d(relu, kernel, [1, 1, 1, 1], padding='SAME')
             biases = tf.Variable(tf.constant(0.0, shape=[nOutputPlane], dtype=tf.float32),
                                  trainable=self.trainable, name='block_conv1_biases')
-            block_conv1_out = tf.nn.bias_add(conv, biases, name = scope)
+            out = tf.nn.bias_add(conv, biases, name = scope)
 
         #with tf.name_scope('block_conv2') as scope:
         #    batchNorm = BatchNormalization(axis = -1, name= 'block_conv1_BatchNormal')(block_conv1_out)
+
+    def build_teacher_model(self, rgb, num_classes, seed, train_mode):
+
+        k = 2
+        nStages = [16, 16 * k, 32 * k, 64 * k]
+
+        with tf.name_scope('teacher_conv1') as scope:
+            kernel = tf.Variable(tf.truncated_normal([3, 3, self.num_channels, 16], dtype=tf.float32, stddev=1e-2, seed=seed), trainable=self.trainable, name='teacher_conv1_kernel')
+            conv = tf.nn.conv2d(rgb, kernel, [1, 1, 1, 1], padding='SAME')
+            biases = tf.Variable(tf.constant(0.0, shape=[16], dtype=tf.float32), trainable=self.trainable, name='teacher_conv1_biases')
+            conv1_out = tf.nn.bias_add(conv, biases, name = scope)
+        print(conv1_out)
+
+
+
 
