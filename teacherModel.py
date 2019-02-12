@@ -16,7 +16,7 @@ class Teacher(object):
         self.num_channels = num_channels
         self.seed = seed
 
-    def Convolution(self, rgb, nInputPlane, nOutputPlane, seed):
+    def Convolution(self, rgb, nInputPlane, nOutputPlane):
         with tf.name_scope('teacher_Convolution') as scope:
             kernel = tf.Variable(tf.truncated_normal([3, 3, nInputPlane, nOutputPlane], dtype=tf.float32, stddev=1e-2, seed=self.seed), trainable=self.trainable, name='teacher_Convolution_kernel')
             conv = tf.nn.conv2d(rgb, kernel, [1, 1, 1, 1], padding='SAME')
