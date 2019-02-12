@@ -62,6 +62,7 @@ class Teacher(object):
         print(conv1)
         group1 = self.layer(conv1, nStages[0], nStages[1], n, 1)
         group2 = self.layer(group1, nStages[1], nStages[2], n, 2)
+        group3 = self.layer(group2, nStages[2], nStages[3], n, 2)
 
 
 
