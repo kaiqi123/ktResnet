@@ -12,7 +12,7 @@ import argparse
 from tensorflow.python.client import device_lib
 
 tf.reset_default_graph()
-NUM_ITERATIONS = 3
+NUM_ITERATIONS = 78200
 TeacherModel_K = 10
 TeacherModel_N = 3
 SEED = 1234
