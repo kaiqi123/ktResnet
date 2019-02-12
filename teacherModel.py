@@ -15,6 +15,8 @@ class Teacher(object):
         self.parameters = []
         self.num_channels = num_channels
         self.seed = seed
+        self.fc = None
+        self.softmax = None
 
     def Convolution(self, imgInput, nInputPlane, nOutputPlane, stride):
         with tf.name_scope('Convolution') as scope:
@@ -46,7 +48,7 @@ class Teacher(object):
         with tf.name_scope('block_conv2') as scope:
             batchNorm = BatchNormalization(axis = -1, name= 'BatchNormal')(out1)
             relu = tf.nn.relu(batchNorm, name='relu')
-            dropout = tf.nn.dropout(relu, 0.5, seed=self.seed)
+            dropout = tf.nn.dropout(relu, 0.3, seed=self.seed)
             out2 = self.Convolution(dropout, nOutputPlane, nOutputPlane, 1)
             print(out2)
         return out2
@@ -72,13 +74,24 @@ class Teacher(object):
         group3 = self.layer(group2, nStages[2], nStages[3], n, 2)
         batchNorm = BatchNormalization(axis=-1, name='BatchNormal')(group3)
         relu = tf.nn.relu(batchNorm, name='relu')
-        print(relu)
         averagePool = tf.nn.avg_pool(relu, ksize=[1, 8, 8, 1], strides=[1, 1, 1, 1], padding='VALID', name='averagePool')
         print(averagePool)
-        fc = self.FullyConnect(averagePool, num_classes)
-        print(fc)
-        softmax = tf.nn.softmax(fc)
-        print(softmax)
+        self.fc = self.FullyConnect(averagePool, num_classes)
+        print(self.fc)
+        self.softmax = tf.nn.softmax(self.fc)
+        print(self.softmax)
+        return self
+
+    def loss(self, labels):
+        cross_entropy = tf.nn.sparse_softmax_cross_entropy_with_logits(labels=labels, logits=self.fc, name='crossEntropy')
+        return tf.reduce_mean(cross_entropy, name='entropyMean')
+
+    def training(self, loss, learning_rate, global_step):
+        tf.summary.scalar('loss', loss)
+        optimizer = tf.train.MomentumOptimizer(learning_rate, momentum = 0.9, use_nesterov = True)
+        #optimizer = tf.train.AdamOptimizer(learning_rate)
+        train_op = optimizer.minimize(loss, global_step=global_step)
+        return train_op
 
 
 
