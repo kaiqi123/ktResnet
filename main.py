@@ -20,12 +20,6 @@ class Resnet(object):
 
     def define_teacher(self, images_placeholder, labels_placeholder, global_step, sess):
 
-        """
-            1. Train teacher prior to student so that knowledge from teacher can be transferred to train student.
-            2. Teacher object is trained by importing weights from a pretrained vgg 16 network
-            3. Mentor object is a network trained from scratch. We did not find the pretrained network with the same architecture for cifar10.
-               Thus, trained the network from scratch on cifar10
-        """
         mentor = Teacher(FLAGS.num_channels)
 
         mentor.build_teacher_model(images_placeholder, FLAGS.num_classes, seed)

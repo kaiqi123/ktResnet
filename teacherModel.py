@@ -15,6 +15,14 @@ class Teacher(object):
         self.parameters = []
         self.num_channels = num_channels
 
+    def Convolution(self, rgb, nInputPlane, nOutputPlane, seed):
+        with tf.name_scope('teacher_Convolution') as scope:
+            kernel = tf.Variable(tf.truncated_normal([3, 3, nInputPlane, nOutputPlane], dtype=tf.float32, stddev=1e-2, seed=seed), trainable=self.trainable, name='teacher_Convolution_kernel')
+            conv = tf.nn.conv2d(rgb, kernel, [1, 1, 1, 1], padding='SAME')
+            biases = tf.Variable(tf.constant(0.0, shape=[nOutputPlane], dtype=tf.float32), trainable=self.trainable, name='teacher_Convolution_biases')
+            out = tf.nn.bias_add(conv, biases, name=scope)
+        return out
+
     def basic_block(self, nInputPlane, nOutputPlane):
 
         print("wide_basic")
@@ -37,12 +45,9 @@ class Teacher(object):
         k = 2
         nStages = [16, 16 * k, 32 * k, 64 * k]
 
-        with tf.name_scope('teacher_conv1') as scope:
-            kernel = tf.Variable(tf.truncated_normal([3, 3, self.num_channels, 16], dtype=tf.float32, stddev=1e-2, seed=seed), trainable=self.trainable, name='teacher_conv1_kernel')
-            conv = tf.nn.conv2d(rgb, kernel, [1, 1, 1, 1], padding='SAME')
-            biases = tf.Variable(tf.constant(0.0, shape=[16], dtype=tf.float32), trainable=self.trainable, name='teacher_conv1_biases')
-            conv1_out = tf.nn.bias_add(conv, biases, name = scope)
-            print(conv1_out)
+        #self.basic_block(nInputPlane, nOutputPlane)
+        conv1_out = self.Convolution(rgb, self.num_channels, 16, seed)
+        print(conv1_out)
 
 
 
