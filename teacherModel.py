@@ -17,26 +17,23 @@ class Teacher(object):
         self.seed = seed
 
     def Convolution(self, imgInput, nInputPlane, nOutputPlane):
-        with tf.name_scope('teacher_Convolution') as scope:
-            kernel = tf.Variable(tf.truncated_normal([3, 3, nInputPlane, nOutputPlane], dtype=tf.float32, stddev=1e-2, seed=self.seed), trainable=self.trainable, name='teacher_Convolution_kernel')
+        with tf.name_scope('Convolution') as scope:
+            kernel = tf.Variable(tf.truncated_normal([3, 3, nInputPlane, nOutputPlane], dtype=tf.float32, stddev=1e-2, seed=self.seed), trainable=self.trainable, name='kernel')
             conv = tf.nn.conv2d(imgInput, kernel, [1, 1, 1, 1], padding='SAME')
-            biases = tf.Variable(tf.constant(0.0, shape=[nOutputPlane], dtype=tf.float32), trainable=self.trainable, name='teacher_Convolution_biases')
+            biases = tf.Variable(tf.constant(0.0, shape=[nOutputPlane], dtype=tf.float32), trainable=self.trainable, name='biases')
             imgOutput = tf.nn.bias_add(conv, biases, name=scope)
         return imgOutput
 
     def basic_block(self, imgInput, nInputPlane, nOutputPlane):
 
-        print("wide_basic")
+        print("basic_block")
 
         with tf.name_scope('block_conv1') as scope:
-            batchNorm = BatchNormalization(axis = -1, name= 'block_conv1_BatchNormal')(imgInput)
+            batchNorm = BatchNormalization(axis = -1, name= 'BatchNormal')(imgInput)
             print(batchNorm)
-            relu = tf.nn.relu(batchNorm, name='block_conv1_relu')
+            relu = tf.nn.relu(batchNorm, name='relu')
             out = self.Convolution(relu, nInputPlane, nOutputPlane)
             print(out)
-
-
-
 
         #with tf.name_scope('block_conv2') as scope:
         #    batchNorm = BatchNormalization(axis = -1, name= 'block_conv1_BatchNormal')(block_conv1_out)
