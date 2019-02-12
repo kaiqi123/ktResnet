@@ -44,13 +44,13 @@ class Teacher(object):
 
     def layer(self, imgInput, nInputPlane, nOutputPlane, n, stride):
 
-        block1 = self.basic_block(imgInput, nInputPlane, nOutputPlane, stride)
-        block = self.basic_block(block1, nOutputPlane, nOutputPlane, 1)
-        for i in range(n-2):
-            block = self.basic_block(block, nOutputPlane, nOutputPlane, 1)
+        print("group")
+        with tf.name_scope('group') as scope:
+            block1 = self.basic_block(imgInput, nInputPlane, nOutputPlane, stride)
+            block = self.basic_block(block1, nOutputPlane, nOutputPlane, 1)
+            for i in range(n-2):
+                block = self.basic_block(block, nOutputPlane, nOutputPlane, 1)
         return block
-
-
 
     def build_teacher_model(self, rgb, num_classes):
 
