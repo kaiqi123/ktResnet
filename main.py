@@ -18,8 +18,8 @@ Depth = 28
 TeacherModel_N = (Depth - 4) / 6
 SEED = 1234
 Dataset_Path = "./"
-Num_Epoch_Per_Decay = 60
-learningRateDecayRatio = 0.2
+Num_Epoch_Per_Decay = 1.0
+learningRateDecayRatio = 0.9809
 test_accuracy_list = []
 
 class Resnet(object):
@@ -102,7 +102,7 @@ class Resnet(object):
         steps_per_epoch = FLAGS.num_examples_per_epoch_for_train / FLAGS.batch_size
         decay_steps = int(steps_per_epoch * Num_Epoch_Per_Decay)
         lr = tf.train.exponential_decay(FLAGS.learning_rate, global_step, decay_steps, learningRateDecayRatio, staircase=True)
-        
+
         self.train_op = mentor.training(self.loss, lr, global_step)
         self.softmax = mentor_data_dict.softmax
 
