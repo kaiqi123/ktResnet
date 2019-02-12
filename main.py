@@ -18,8 +18,8 @@ Depth = 28
 TeacherModel_N = (Depth - 4) / 6
 SEED = 1234
 Dataset_Path = "./"
-Num_Epoch_Per_Decay = 1.0
-learningRateDecayRatio = 0.9809
+Num_Epoch_Per_Decay = 60
+learningRateDecayRatio = 0.2
 test_accuracy_list = []
 
 class Resnet(object):
