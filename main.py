@@ -23,13 +23,13 @@ learningRateDecayRatio=0.2
 class Resnet(object):
 
 
+
     def define_teacher(self, images_placeholder, labels_placeholder, global_step, sess):
 
         mentor = Teacher(FLAGS.num_channels, SEED)
         mentor_data_dict = mentor.build_teacher_model(images_placeholder, FLAGS.num_classes, TeacherModel_K, TeacherModel_N)
-
-        """
         self.loss = mentor.loss(labels_placeholder)
+
         # learning rate decay
         steps_per_epoch = FLAGS.num_examples_per_epoch_for_train / FLAGS.batch_size
         decay_steps = int(steps_per_epoch * Num_Epoch_Per_Decay)
@@ -37,7 +37,7 @@ class Resnet(object):
         
         self.train_op = mentor.training(self.loss, lr, global_step)
         self.softmax = mentor_data_dict.softmax
-        """
+
         init = tf.global_variables_initializer()
         sess.run(init)
         self.saver = tf.train.Saver()
@@ -99,7 +99,7 @@ if __name__ == '__main__':
     parser.add_argument(
         '--learning_rate',
         type=float,
-        default=0.001
+        default=0.1
     )
     parser.add_argument(
         '--batch_size',
