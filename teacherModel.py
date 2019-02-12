@@ -24,6 +24,15 @@ class Teacher(object):
             imgOutput = tf.nn.bias_add(conv, biases, name=scope)
         return imgOutput
 
+    def FullyConnect(self, imgInput, nOutputPlane):
+        with tf.name_scope('FullyConnect') as scope:
+            shape = int(np.prod(imgInput.get_shape()[1:]))
+            fcw = tf.Variable(tf.truncated_normal([shape, nOutputPlane], dtype=tf.float32, stddev=1e-2, seed=self.seed), trainable=self.trainable, name='weights')
+            fcb = tf.Variable(tf.constant(0.0, shape=[nOutputPlane], dtype=tf.float32), trainable=self.trainable, name='biases')
+            flat = tf.reshape(imgInput, [-1, shape])
+            imgOutput = tf.nn.bias_add(tf.matmul(flat, fcw), fcb)
+        return imgOutput
+
     def basic_block(self, imgInput, nInputPlane, nOutputPlane, stride):
 
         print("basic_block")
@@ -63,6 +72,20 @@ class Teacher(object):
         group1 = self.layer(conv1, nStages[0], nStages[1], n, 1)
         group2 = self.layer(group1, nStages[1], nStages[2], n, 2)
         group3 = self.layer(group2, nStages[2], nStages[3], n, 2)
+        batchNorm = BatchNormalization(axis=-1, name='BatchNormal')(group3)
+        relu = tf.nn.relu(batchNorm, name='relu')
+        averagePool = tf.nn.avg_pool(relu, ksize=[1, 8, 8, 1], strides=[1, 1, 1, 1], padding='SAME', name='averagePool')
+        fc = self.FullyConnect(averagePool, num_classes)
+        print(fc)
+        softmax = tf.nn.softmax(fc)
+        print(softmax)
+
+
+
+
+
+
+
 
 
 
