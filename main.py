@@ -12,13 +12,14 @@ import argparse
 from tensorflow.python.client import device_lib
 
 tf.reset_default_graph()
-NUM_ITERATIONS = 3
+NUM_ITERATIONS = 78200
 TeacherModel_K = 10
-TeacherModel_N = 3
+Depth = 28
+TeacherModel_N = (Depth - 4) / 6
 SEED = 1234
 Dataset_Path = "./"
 Num_Epoch_Per_Decay = 60
-learningRateDecayRatio=0.2
+learningRateDecayRatio = 0.2
 test_accuracy_list = []
 
 class Resnet(object):
@@ -197,6 +198,7 @@ class Resnet(object):
             print("NUM_ITERATIONS: " + str(NUM_ITERATIONS))
             print("learning_rate: " + str(FLAGS.learning_rate))
             print("batch_size: " + str(FLAGS.batch_size))
+            print("TeacherModel_N: " + str(TeacherModel_N))
 
             if FLAGS.teacher:
                 self.define_teacher(images_placeholder, labels_placeholder, global_step, sess)
