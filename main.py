@@ -75,7 +75,7 @@ class Resnet(object):
 
             true_count = 0
             for step in xrange(steps_per_epoch):
-                if FLAGS.dataset == 'mnist':
+                if FLAGS.datasetName == 'mnist':
                     feed_dict = {images_placeholder: np.reshape(dataset.test.next_batch(FLAGS.batch_size)[0], [FLAGS.batch_size, FLAGS.image_width, FLAGS.image_height, FLAGS.num_channels]), labels_placeholder: dataset.test.next_batch(FLAGS.batch_size)[1]}
                 else:
                     feed_dict, images_feed, labels_feed = self.fill_feed_dict(dataset, images_placeholder,
