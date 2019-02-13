@@ -13,7 +13,7 @@ from tensorflow.python.client import device_lib
 
 tf.reset_default_graph()
 NUM_ITERATIONS = 7820
-TeacherModel_K = 10
+TeacherModel_K = 2
 Depth = 28
 TeacherModel_N = (Depth - 4) / 6
 SEED = 1234
