@@ -40,18 +40,17 @@ class Teacher(object):
         print("basic_block")
 
         with tf.name_scope('block_conv1') as scope:
-            out = self.Convolution(imgInput, nInputPlane, nOutputPlane, stride)
-            relu = tf.nn.relu(out, name='relu')
-            #batchNorm = BatchNormalization(axis = -1, name= 'BatchNormal')(relu)
-            print(relu)
+
+            relu = tf.nn.relu(imgInput, name='relu')
+            out = self.Convolution(relu, nInputPlane, nOutputPlane, stride)
+            print(out)
 
         with tf.name_scope('block_conv2') as scope:
             #dropout = tf.nn.dropout(batchNorm, 0.3, seed=self.seed)
-            out = self.Convolution(relu, nOutputPlane, nOutputPlane, 1)
             relu = tf.nn.relu(out, name='relu')
-            #batchNorm = BatchNormalization(axis = -1, name= 'BatchNormal')(relu)
-            print(relu)
-        return relu
+            out = self.Convolution(relu, nOutputPlane, nOutputPlane, 1)
+            print(out)
+        return out
 
     def layer(self, imgInput, nInputPlane, nOutputPlane, n, stride):
 
@@ -70,48 +69,20 @@ class Teacher(object):
         nStages = [16, 16 * k, 32 * k, 64 * k]
 
         conv1 = self.Convolution(rgb, self.num_channels, nStages[0], 1)
-        relu = tf.nn.relu(conv1, name='relu')
-        print(relu)
+        print(conv1)
         #group1 = self.layer(conv1, nStages[0], nStages[1], n, 1)
         #group2 = self.layer(group1, nStages[1], nStages[2], n, 2)
         #group3 = self.layer(group2, nStages[2], nStages[3], n, 2)
 
-        group1 = self.basic_block(relu, nStages[0],  nStages[1], 1)
+        group1 = self.basic_block(conv1, nStages[0],  nStages[1], 1)
         #group2 = self.basic_block(group1, nStages[1], nStages[2], 2)
         #group3 = self.basic_block(group2, nStages[2], nStages[3], 2)
 
         #batchNorm = BatchNormalization(axis=-1, name='BatchNormal')(group3)
-        #relu = tf.nn.relu(batchNorm, name='relu')
-        averagePool = tf.nn.avg_pool(group1, ksize=[1, 8, 8, 1], strides=[1, 1, 1, 1], padding='SAME', name='averagePool')
+        relu = tf.nn.relu(group1, name='relu')
+        averagePool = tf.nn.avg_pool(relu, ksize=[1, 8, 8, 1], strides=[1, 1, 1, 1], padding='SAME', name='averagePool')
         print(averagePool)
-        self.fc = self.FullyConnect(group1, num_classes)
-        print(self.fc)
-        self.softmax = tf.nn.softmax(self.fc)
-        print(self.softmax)
-        return self
-
-    def temp(self, rgb, num_classes, k, n):
-
-        K.set_learning_phase(True)
-
-        nStages = [16, 16 * k, 32 * k, 64 * k]
-
-        conv1 = self.Convolution(rgb, self.num_channels, nStages[0], 1)
-        relu = tf.nn.relu(conv1, name='relu')
-        print(relu)
-        #group1 = self.layer(conv1, nStages[0], nStages[1], n, 1)
-        #group2 = self.layer(group1, nStages[1], nStages[2], n, 2)
-        #group3 = self.layer(group2, nStages[2], nStages[3], n, 2)
-
-        group1 = self.basic_block(relu, nStages[0],  nStages[0], 1)
-        #group2 = self.basic_block(group1, nStages[1], nStages[2], 2)
-        #group3 = self.basic_block(group2, nStages[2], nStages[3], 2)
-
-        #batchNorm = BatchNormalization(axis=-1, name='BatchNormal')(group3)
-        #relu = tf.nn.relu(batchNorm, name='relu')
-        averagePool = tf.nn.avg_pool(group1, ksize=[1, 8, 8, 1], strides=[1, 1, 1, 1], padding='SAME', name='averagePool')
-        print(averagePool)
-        self.fc = self.FullyConnect(group1, num_classes)
+        self.fc = self.FullyConnect(averagePool, num_classes)
         print(self.fc)
         self.softmax = tf.nn.softmax(self.fc)
         print(self.softmax)
