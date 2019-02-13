@@ -40,18 +40,18 @@ class Teacher(object):
         print("basic_block")
 
         with tf.name_scope('block_conv1') as scope:
-            batchNorm = BatchNormalization(axis = -1, name= 'BatchNormal')(imgInput)
-            relu = tf.nn.relu(batchNorm, name='relu')
-            out1 = self.Convolution(relu, nInputPlane, nOutputPlane, stride)
-            print(out1)
+            out = self.Convolution(imgInput, nInputPlane, nOutputPlane, stride)
+            relu = tf.nn.relu(out, name='relu')
+            batchNorm = BatchNormalization(axis = -1, name= 'BatchNormal')(relu)
+            print(batchNorm)
 
         with tf.name_scope('block_conv2') as scope:
-            batchNorm = BatchNormalization(axis = -1, name= 'BatchNormal')(out1)
-            relu = tf.nn.relu(batchNorm, name='relu')
-            dropout = tf.nn.dropout(relu, 0.3, seed=self.seed)
-            out2 = self.Convolution(dropout, nOutputPlane, nOutputPlane, 1)
-            print(out2)
-        return out2
+            dropout = tf.nn.dropout(batchNorm, 0.3, seed=self.seed)
+            out = self.Convolution(dropout, nInputPlane, nOutputPlane, stride)
+            relu = tf.nn.relu(out, name='relu')
+            batchNorm = BatchNormalization(axis = -1, name= 'BatchNormal')(relu)
+            print(batchNorm)
+        return batchNorm
 
     def layer(self, imgInput, nInputPlane, nOutputPlane, n, stride):
 
@@ -91,12 +91,16 @@ class Teacher(object):
 
     def build_vgg_conv1fc1(self, rgb, num_classes):
 
-        K.set_learning_phase(True)
         print("build_vgg_conv1fc1")
-        batchNorm = BatchNormalization(axis=-1, name='BatchNormal')(rgb)
-        relu = tf.nn.relu(batchNorm, name='relu')
-        conv = self.Convolution(relu, self.num_channels, 16, 1)
-        self.fc = self.FullyConnect(conv, num_classes)
+        K.set_learning_phase(True)
+
+        #conv = self.Convolution(rgb, self.num_channels, 16, 1)
+        #relu = tf.nn.relu(conv, name='relu')
+        #batchNorm = BatchNormalization(axis=-1, name='BatchNormal')(relu)
+
+        batchNorm = self.basic_block(rgb, num_classes, 16, 1)
+
+        self.fc = self.FullyConnect(batchNorm, num_classes)
         self.softmax = tf.nn.softmax(self.fc)
         return self
 
