@@ -21,7 +21,7 @@ class Teacher(object):
     def Convolution(self, imgInput, nInputPlane, nOutputPlane, stride):
         with tf.name_scope('Convolution') as scope:
             kernel = tf.Variable(tf.truncated_normal([3, 3, nInputPlane, nOutputPlane], dtype=tf.float32, stddev=1e-2, seed=self.seed), trainable=self.trainable, name='kernel')
-            conv = tf.nn.conv2d(imgInput, filter=kernel, strides=[1, stride, stride, 1], padding='SAME')
+            conv = tf.nn.conv2d(imgInput, filter=kernel, strides=[1, stride, stride, 1], padding='VALID')
             biases = tf.Variable(tf.constant(0.0, shape=[nOutputPlane], dtype=tf.float32), trainable=self.trainable, name='biases')
             imgOutput = tf.nn.bias_add(conv, biases, name=scope)
         return imgOutput
@@ -79,7 +79,7 @@ class Teacher(object):
 
         batchNorm = BatchNormalization(axis=-1, name='BatchNormal')(group3)
         relu = tf.nn.relu(batchNorm, name='relu')
-        averagePool = tf.nn.avg_pool(relu, ksize=[1, 8, 8, 1], strides=[1, 1, 1, 1], padding='SAME', name='averagePool')
+        averagePool = tf.nn.avg_pool(relu, ksize=[1, 8, 8, 1], strides=[1, 1, 1, 1], padding='VALID', name='averagePool')
         print(averagePool)
         self.fc = self.FullyConnect(averagePool, num_classes)
         print(self.fc)
