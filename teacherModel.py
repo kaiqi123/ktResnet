@@ -98,7 +98,7 @@ class Teacher(object):
         #relu = tf.nn.relu(conv, name='relu')
         #batchNorm = BatchNormalization(axis=-1, name='BatchNormal')(relu)
 
-        batchNorm = self.basic_block(rgb, num_classes, 16, 1)
+        batchNorm = self.basic_block(rgb, self.num_channels, 16, 1)
 
         self.fc = self.FullyConnect(batchNorm, num_classes)
         self.softmax = tf.nn.softmax(self.fc)
