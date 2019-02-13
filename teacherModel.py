@@ -76,7 +76,7 @@ class Teacher(object):
         #group2 = self.layer(group1, nStages[1], nStages[2], n, 2)
         #group3 = self.layer(group2, nStages[2], nStages[3], n, 2)
 
-        group1 = self.basic_block(relu, self.num_channels,  nStages[0], 1)
+        group1 = self.basic_block(relu, nStages[0],  nStages[0], 1)
         #group2 = self.basic_block(group1, nStages[1], nStages[2], 2)
         #group3 = self.basic_block(group2, nStages[2], nStages[3], 2)
 
