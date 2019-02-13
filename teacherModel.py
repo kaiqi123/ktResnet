@@ -47,7 +47,7 @@ class Teacher(object):
 
         with tf.name_scope('block_conv2') as scope:
             dropout = tf.nn.dropout(batchNorm, 0.3, seed=self.seed)
-            out = self.Convolution(dropout, nOutputPlane, nOutputPlane, stride)
+            out = self.Convolution(dropout, nOutputPlane, nOutputPlane, 1)
             relu = tf.nn.relu(out, name='relu')
             batchNorm = BatchNormalization(axis = -1, name= 'BatchNormal')(relu)
             print(batchNorm)
