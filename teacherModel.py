@@ -65,6 +65,8 @@ class Teacher(object):
 
     def build_teacher_model(self, rgb, num_classes, k, n):
 
+        K.set_learning_phase(True)
+
         nStages = [16, 16 * k, 32 * k, 64 * k]
 
         conv1 = self.Convolution(rgb, self.num_channels, nStages[0], 1)
@@ -85,6 +87,16 @@ class Teacher(object):
         print(self.fc)
         self.softmax = tf.nn.softmax(self.fc)
         print(self.softmax)
+        return self
+
+    def build_vgg_conv1fc1(self, rgb, num_classes):
+
+        K.set_learning_phase(True)
+        print("build_vgg_conv1fc1")
+        conv = self.Convolution(rgb, self.num_channels, 64, 1)
+        pool = tf.nn.max_pool(conv, ksize=[1, 2, 2, 1], strides=[1, 2, 2, 1], padding='SAME', name='pool1')
+        self.fc = self.FullyConnect(pool, num_classes)
+        self.softmax = tf.nn.softmax(self.fc)
         return self
 
     def loss(self, labels):

@@ -95,7 +95,8 @@ class Resnet(object):
     def define_teacher(self, images_placeholder, labels_placeholder, global_step, sess):
 
         mentor = Teacher(FLAGS.num_channels, SEED)
-        mentor_data_dict = mentor.build_teacher_model(images_placeholder, FLAGS.num_classes, TeacherModel_K, TeacherModel_N)
+        #mentor_data_dict = mentor.build_teacher_model(images_placeholder, FLAGS.num_classes, TeacherModel_K, TeacherModel_N)
+        mentor_data_dict = mentor.build_vgg_conv1fc1(images_placeholder, FLAGS.num_classes)
         self.loss = mentor.loss(labels_placeholder)
 
         # learning rate decay
