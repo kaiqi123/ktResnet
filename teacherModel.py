@@ -70,13 +70,13 @@ class Teacher(object):
 
         conv1 = self.Convolution(rgb, self.num_channels, nStages[0], 1)
         print(conv1)
-        #group1 = self.layer(conv1, nStages[0], nStages[1], n, 1)
-        #group2 = self.layer(group1, nStages[1], nStages[2], n, 2)
-        #group3 = self.layer(group2, nStages[2], nStages[3], n, 2)
+        group1 = self.layer(conv1, nStages[0], nStages[1], n, 1)
+        group2 = self.layer(group1, nStages[1], nStages[2], n, 2)
+        group3 = self.layer(group2, nStages[2], nStages[3], n, 2)
 
-        group1 = self.basic_block(conv1, nStages[0],  nStages[1], 1)
-        group2 = self.basic_block(group1, nStages[1], nStages[2], 2)
-        group3 = self.basic_block(group2, nStages[2], nStages[3], 2)
+        #group1 = self.basic_block(conv1, nStages[0],  nStages[1], 1)
+        #group2 = self.basic_block(group1, nStages[1], nStages[2], 2)
+        #group3 = self.basic_block(group2, nStages[2], nStages[3], 2)
 
         #batchNorm = BatchNormalization(axis=-1, name='BatchNormal')(group3)
         relu = tf.nn.relu(group3, name='relu')
