@@ -41,14 +41,17 @@ class Teacher(object):
 
         with tf.name_scope('block_conv1') as scope:
 
-            relu = tf.nn.relu(imgInput, name='relu')
+            batchNorm = BatchNormalization(axis=-1, name='BatchNormal')(imgInput)
+            relu = tf.nn.relu(batchNorm, name='relu')
             out = self.Convolution(relu, nInputPlane, nOutputPlane, stride)
             print(out)
 
         with tf.name_scope('block_conv2') as scope:
-            #dropout = tf.nn.dropout(batchNorm, 0.3, seed=self.seed)
-            relu = tf.nn.relu(out, name='relu')
-            out = self.Convolution(relu, nOutputPlane, nOutputPlane, 1)
+
+            batchNorm = BatchNormalization(axis=-1, name='BatchNormal')(out)
+            relu = tf.nn.relu(batchNorm, name='relu')
+            dropout = tf.nn.dropout(relu, 0.3, seed=self.seed)
+            out = self.Convolution(dropout, nOutputPlane, nOutputPlane, 1)
             print(out)
         return out
 
@@ -78,8 +81,8 @@ class Teacher(object):
         #group2 = self.basic_block(group1, nStages[1], nStages[2], 2)
         #group3 = self.basic_block(group2, nStages[2], nStages[3], 2)
 
-        #batchNorm = BatchNormalization(axis=-1, name='BatchNormal')(group3)
-        relu = tf.nn.relu(group3, name='relu')
+        batchNorm = BatchNormalization(axis=-1, name='BatchNormal')(group3)
+        relu = tf.nn.relu(batchNorm, name='relu')
         averagePool = tf.nn.avg_pool(relu, ksize=[1, 8, 8, 1], strides=[1, 1, 1, 1], padding='SAME', name='averagePool')
         print(averagePool)
         self.fc = self.FullyConnect(averagePool, num_classes)
