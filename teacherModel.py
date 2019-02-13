@@ -21,7 +21,7 @@ class Teacher(object):
     def Convolution(self, imgInput, nInputPlane, nOutputPlane, stride):
         with tf.name_scope('Convolution') as scope:
             kernel = tf.Variable(tf.truncated_normal([3, 3, nInputPlane, nOutputPlane], dtype=tf.float32, stddev=1e-2, seed=self.seed), trainable=self.trainable, name='kernel')
-            conv = tf.nn.conv2d(imgInput, filter=kernel, strides=[1, stride, stride, 1], padding='VALID')
+            conv = tf.nn.conv2d(imgInput, filter=kernel, strides=[1, stride, stride, 1], padding='SAME')
             biases = tf.Variable(tf.constant(0.0, shape=[nOutputPlane], dtype=tf.float32), trainable=self.trainable, name='biases')
             imgOutput = tf.nn.bias_add(conv, biases, name=scope)
         return imgOutput
