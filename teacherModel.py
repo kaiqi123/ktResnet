@@ -93,14 +93,10 @@ class Teacher(object):
 
         print("build_vgg_conv1fc1")
         K.set_learning_phase(True)
-
-        #conv = self.Convolution(rgb, self.num_channels, 16, 1)
-        #relu = tf.nn.relu(conv, name='relu')
+        conv = self.Convolution(rgb, self.num_channels, 16, 1)
+        relu = tf.nn.relu(conv, name='relu')
         #batchNorm = BatchNormalization(axis=-1, name='BatchNormal')(relu)
-
-        batchNorm = self.basic_block(rgb, self.num_channels, 16, 1)
-
-        self.fc = self.FullyConnect(batchNorm, num_classes)
+        self.fc = self.FullyConnect(relu, num_classes)
         self.softmax = tf.nn.softmax(self.fc)
         return self
 
