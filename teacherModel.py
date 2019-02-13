@@ -81,7 +81,7 @@ class Teacher(object):
 
         batchNorm = BatchNormalization(axis=-1, name='BatchNormal')(group3)
         relu = tf.nn.relu(batchNorm, name='relu')
-        averagePool = tf.nn.avg_pool(relu, ksize=[1, 8, 8, 1], strides=[1, 1, 1, 1], padding='VALID', name='averagePool')
+        averagePool = tf.nn.avg_pool(relu, ksize=[1, 8, 8, 1], strides=[1, 1, 1, 1], padding='SAME', name='averagePool')
         print(averagePool)
         self.fc = self.FullyConnect(averagePool, num_classes)
         print(self.fc)
@@ -94,7 +94,8 @@ class Teacher(object):
         K.set_learning_phase(True)
         print("build_vgg_conv1fc1")
         conv = self.Convolution(rgb, self.num_channels, 64, 1)
-        pool = tf.nn.max_pool(conv, ksize=[1, 2, 2, 1], strides=[1, 2, 2, 1], padding='SAME', name='pool1')
+        batchNorm = BatchNormalization(axis=-1, name='BatchNormal')(conv)
+        pool = tf.nn.max_pool(batchNorm, ksize=[1, 2, 2, 1], strides=[1, 2, 2, 1], padding='SAME', name='pool1')
         self.fc = self.FullyConnect(pool, num_classes)
         self.softmax = tf.nn.softmax(self.fc)
         return self
