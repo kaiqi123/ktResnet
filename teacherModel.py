@@ -96,8 +96,8 @@ class Teacher(object):
         conv = self.Convolution(rgb, self.num_channels, 64, 1)
         relu = tf.nn.relu(conv, name='relu')
         batchNorm = BatchNormalization(axis=-1, name='BatchNormal')(relu)
-        pool = tf.nn.max_pool(batchNorm, ksize=[1, 2, 2, 1], strides=[1, 2, 2, 1], padding='SAME', name='pool1')
-        self.fc = self.FullyConnect(pool, num_classes)
+        #pool = tf.nn.max_pool(batchNorm, ksize=[1, 2, 2, 1], strides=[1, 2, 2, 1], padding='SAME', name='pool1')
+        self.fc = self.FullyConnect(batchNorm, num_classes)
         self.softmax = tf.nn.softmax(self.fc)
         return self
 
