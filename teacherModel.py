@@ -93,7 +93,7 @@ class Teacher(object):
 
         K.set_learning_phase(True)
         print("build_vgg_conv1fc1")
-        conv = self.Convolution(rgb, self.num_channels, 64, 1)
+        conv = self.Convolution(rgb, self.num_channels, 16, 1)
         relu = tf.nn.relu(conv, name='relu')
         batchNorm = BatchNormalization(axis=-1, name='BatchNormal')(relu)
         #pool = tf.nn.max_pool(batchNorm, ksize=[1, 2, 2, 1], strides=[1, 2, 2, 1], padding='SAME', name='pool1')
