@@ -40,46 +40,42 @@ class Teacher(object):
         print("basic_block")
 
         with tf.name_scope('block_conv1') as scope:
-
-            batchNorm = BatchNormalization(axis=-1, name='BatchNormal')(imgInput)
+            batchNorm = BatchNormalization(axis = -1, name= 'BatchNormal')(imgInput)
             relu = tf.nn.relu(batchNorm, name='relu')
-            out = self.Convolution(relu, nInputPlane, nOutputPlane, stride)
-            print(out)
+            out1 = self.Convolution(relu, nInputPlane, nOutputPlane, stride)
+            print(out1)
 
         with tf.name_scope('block_conv2') as scope:
-
-            batchNorm = BatchNormalization(axis=-1, name='BatchNormal')(out)
+            batchNorm = BatchNormalization(axis = -1, name= 'BatchNormal')(out1)
             relu = tf.nn.relu(batchNorm, name='relu')
             dropout = tf.nn.dropout(relu, 0.3, seed=self.seed)
-            out = self.Convolution(dropout, nOutputPlane, nOutputPlane, 1)
-            print(out)
-        return out
+            out2 = self.Convolution(dropout, nOutputPlane, nOutputPlane, 1)
+            print(out2)
+        return out2
 
     def layer(self, imgInput, nInputPlane, nOutputPlane, n, stride):
 
         print("group")
         with tf.name_scope('group1') as scope:
-            block = self.basic_block(imgInput, nInputPlane, nOutputPlane, stride)
-            for i in range(n-1):
-                x = block
-                block = self.basic_block(x, nOutputPlane, nOutputPlane, 1)
+            block1 = self.basic_block(imgInput, nInputPlane, nOutputPlane, stride)
+            block = self.basic_block(block1, nOutputPlane, nOutputPlane, 1)
+            for i in range(n-2):
+                block = self.basic_block(block, nOutputPlane, nOutputPlane, 1)
         return block
 
     def build_teacher_model(self, rgb, num_classes, k, n):
-
-        K.set_learning_phase(True)
 
         nStages = [16, 16 * k, 32 * k, 64 * k]
 
         conv1 = self.Convolution(rgb, self.num_channels, nStages[0], 1)
         print(conv1)
-        group1 = self.layer(conv1, nStages[0], nStages[1], n, 1)
-        group2 = self.layer(group1, nStages[1], nStages[2], n, 2)
-        group3 = self.layer(group2, nStages[2], nStages[3], n, 2)
+        #group1 = self.layer(conv1, nStages[0], nStages[1], n, 1)
+        #group2 = self.layer(group1, nStages[1], nStages[2], n, 2)
+        #group3 = self.layer(group2, nStages[2], nStages[3], n, 2)
 
-        #group1 = self.basic_block(conv1, nStages[0],  nStages[1], 1)
-        #group2 = self.basic_block(group1, nStages[1], nStages[2], 2)
-        #group3 = self.basic_block(group2, nStages[2], nStages[3], 2)
+        group1 = self.basic_block(conv1, nStages[0], nStages[1], 1)
+        group2 = self.basic_block(group1, nStages[1], nStages[2], 2)
+        group3 = self.basic_block(group2, nStages[2], nStages[3], 2)
 
         batchNorm = BatchNormalization(axis=-1, name='BatchNormal')(group3)
         relu = tf.nn.relu(batchNorm, name='relu')
@@ -89,17 +85,6 @@ class Teacher(object):
         print(self.fc)
         self.softmax = tf.nn.softmax(self.fc)
         print(self.softmax)
-        return self
-
-    def build_vgg_conv1fc1(self, rgb, num_classes):
-
-        print("build_vgg_conv1fc1")
-        K.set_learning_phase(True)
-        conv = self.Convolution(rgb, self.num_channels, 16, 1)
-        relu = tf.nn.relu(conv, name='relu')
-        #batchNorm = BatchNormalization(axis=-1, name='BatchNormal')(relu)
-        self.fc = self.FullyConnect(relu, num_classes)
-        self.softmax = tf.nn.softmax(self.fc)
         return self
 
     def loss(self, labels):

@@ -11,7 +11,6 @@ from tensorflow.python import debug as tf_debug
 import argparse
 from tensorflow.python.client import device_lib
 
-
 tf.reset_default_graph()
 NUM_ITERATIONS = 78200
 TeacherModel_K = 10
@@ -97,13 +96,14 @@ class Resnet(object):
 
         mentor = Teacher(FLAGS.num_channels, SEED)
         mentor_data_dict = mentor.build_teacher_model(images_placeholder, FLAGS.num_classes, TeacherModel_K, TeacherModel_N)
+        #mentor_data_dict = mentor.build_vgg_conv1fc1(images_placeholder, FLAGS.num_classes)
         self.loss = mentor.loss(labels_placeholder)
 
         # learning rate decay
         steps_per_epoch = FLAGS.num_examples_per_epoch_for_train / FLAGS.batch_size
         decay_steps = int(steps_per_epoch * Num_Epoch_Per_Decay)
         lr = tf.train.exponential_decay(FLAGS.learning_rate, global_step, decay_steps, learningRateDecayRatio, staircase=True)
-        
+
         self.train_op = mentor.training(self.loss, lr, global_step)
         self.softmax = mentor_data_dict.softmax
 
@@ -200,6 +200,7 @@ class Resnet(object):
             print("learning_rate: " + str(FLAGS.learning_rate))
             print("batch_size: " + str(FLAGS.batch_size))
             print("TeacherModel_N: " + str(TeacherModel_N))
+
             if FLAGS.teacher:
                 self.define_teacher(images_placeholder, labels_placeholder, global_step, sess)
 
