@@ -59,7 +59,9 @@ class DataInput(object):
 			train_image = tf.image.per_image_standardization(train_image)
 			train_image = tf.image.resize_image_with_pad(train_image, self.image_width+self.pad, self.image_width+self.pad)
 			train_image = tf.image.random_flip_left_right(train_image)
-			self.train_image = tf.random_crop(train_image, [self.image_height, self.image_width], seed=self.seed)
+			print(train_image)
+			self.train_image = tf.random_crop(train_image, [self.image_height, self.image_width, 3], seed=self.seed)
+			print(train_image)
 
 			# distorted_image = tf.image.random_flip_left_right(self.train_image)
 			# self.train_image = tf.image.per_image_standardization(distorted_image)

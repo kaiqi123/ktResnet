@@ -91,7 +91,6 @@ class Resnet(object):
             if mode == 'Test':
                 test_accuracy_list.append(precision)
 
-
     def define_teacher(self, images_placeholder, labels_placeholder, global_step, sess):
 
         mentor = Teacher(FLAGS.num_channels, SEED)
