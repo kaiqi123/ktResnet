@@ -2,7 +2,7 @@ import tensorflow as tf
 import numpy as np
 import random
 from DataInput import DataInput
-from teacherModel import Teacher
+from ModelConstruct import Model
 import os
 import time
 import pdb
@@ -12,7 +12,7 @@ import argparse
 from tensorflow.python.client import device_lib
 
 tf.reset_default_graph()
-NUM_ITERATIONS = 78200
+NUM_ITERATIONS = 3
 TeacherModel_K = 10
 Depth = 28
 TeacherModel_N = (Depth - 4) / 6
@@ -21,6 +21,7 @@ Dataset_Path = "./"
 Num_Epoch_Per_Decay = 60
 learningRateDecayRatio = 0.2
 test_accuracy_list = []
+
 
 class Resnet(object):
 
@@ -93,7 +94,7 @@ class Resnet(object):
 
     def define_teacher(self, images_placeholder, labels_placeholder, global_step, sess):
 
-        mentor = Teacher(FLAGS.num_channels, SEED)
+        mentor = Model(FLAGS.num_channels, SEED)
         mentor_data_dict = mentor.build_teacher_model(images_placeholder, FLAGS.num_classes, TeacherModel_K, TeacherModel_N)
         #mentor_data_dict = mentor.build_vgg_conv1fc1(images_placeholder, FLAGS.num_classes)
         self.loss = mentor.loss(labels_placeholder)
@@ -105,6 +106,28 @@ class Resnet(object):
 
         self.train_op = mentor.training(self.loss, lr, global_step)
         self.softmax = mentor_data_dict.softmax
+
+        init = tf.global_variables_initializer()
+        sess.run(init)
+        self.saver = tf.train.Saver()
+
+    def define_independent_student(self, images_placeholder, labels_placeholder, global_step, sess):
+
+        print("Define Independent student")
+        student = Model(FLAGS.num_channels, SEED)
+        if FLAGS.num_optimizers == 3:
+            mentee_data_dict = student.build_resnet_conv1Block1Fc1(images_placeholder, FLAGS.num_classes,  TeacherModel_K)
+        if FLAGS.num_optimizers == 1:
+            mentee_data_dict = student.build_conv1fc1(images_placeholder, FLAGS.num_classes)
+
+        self.loss = student.loss(labels_placeholder)
+
+        steps_per_epoch = FLAGS.num_examples_per_epoch_for_train / FLAGS.batch_size
+        decay_steps = int(steps_per_epoch * Num_Epoch_Per_Decay)
+        lr = tf.train.exponential_decay(FLAGS.learning_rate, global_step, decay_steps, learningRateDecayRatio, staircase=True)
+
+        self.train_op = student.training(self.loss, lr, global_step)
+        self.softmax = mentee_data_dict.softmax
 
         init = tf.global_variables_initializer()
         sess.run(init)
@@ -125,7 +148,7 @@ class Resnet(object):
                                                                           labels_placeholder, sess, 'Train',
                                                                           phase_train)
 
-                if FLAGS.teacher:
+                if FLAGS.teacher or FLAGS.student:
                     # print("train function: independent student or teacher")
                     _, loss_value = sess.run([self.train_op, self.loss], feed_dict=feed_dict)
                     if i % 10 == 0:
@@ -158,7 +181,6 @@ class Resnet(object):
 
         except Exception as e:
             print(e)
-
 
     def main(self, _):
 
@@ -203,6 +225,9 @@ class Resnet(object):
             if FLAGS.teacher:
                 self.define_teacher(images_placeholder, labels_placeholder, global_step, sess)
 
+            elif FLAGS.student:
+                self.define_independent_student(images_placeholder, labels_placeholder, global_step, sess)
+
             self.train_model(data_input_train, data_input_test, images_placeholder, labels_placeholder, sess, phase_train)
 
             print(test_accuracy_list)
@@ -218,88 +243,26 @@ class Resnet(object):
         runtime = round((end_time - start_time) / (60 * 60), 2)
         print("run time is: " + str(runtime) + " hour")
 
+
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument(
-        '--teacher',
-        type=bool,
-        help='train teacher',
-        default=False
-    )
-    parser.add_argument(
-        '--teacher_weights_filename',
-        type=str,
-        default="./summary-log/teacher_weights_filename_cifar10"
-    )
-    parser.add_argument(
-        '--learning_rate',
-        type=float,
-        default=0.1
-    )
-    parser.add_argument(
-        '--batch_size',
-        type=int,
-        default=128
-    )
-    parser.add_argument(
-        '--image_height',
-        type=int,
-        default=32
-    )
-    parser.add_argument(
-        '--image_width',
-        type=int,
-        default=32
-    )
-    parser.add_argument(
-        '--train_dataset',
-        type=str,
-        default="cifar10_input/cifar10-train.txt"
-    )
-    parser.add_argument(
-        '--test_dataset',
-        type=str,
-        default="cifar10_input/cifar10-test.txt"
-    )
-    parser.add_argument(
-        '--num_classes',
-        type=int,
-        default=10
-    )
-    parser.add_argument(
-        '--num_examples_per_epoch_for_train',
-        type=int,
-        default=50000
-    )
-    parser.add_argument(
-        '--num_training_examples',
-        type=int,
-        default=50000
-    )
-    parser.add_argument(
-        '--num_testing_examples',
-        type=int,
-        default=10000
-    )
-    parser.add_argument(
-        '--datasetName',
-        type=str,
-        help='name of the dataset',
-        default='cifar10'
-    )
-    parser.add_argument(
-        '--num_channels',
-        type=int,
-        help='number of channels in the initial layer if it is RGB it will 3 , if it is gray scale it will be 1',
-        default='3'
-    )
-    parser.add_argument(
-        '--top_1_accuracy',
-        type=bool,
-        help='top-1-accuracy',
-        default=True
-    )
-
+    parser.add_argument('--teacher', type=bool, help='train teacher', default=False)
+    parser.add_argument('--student', type=bool, help='train independent student', default=False)
+    parser.add_argument('--teacher_weights_filename', type=str, default="./summary-log/teacher_weights_filename_cifar10")
+    parser.add_argument('--learning_rate', type=float, default=0.1)
+    parser.add_argument('--batch_size', type=int, default=128)
+    parser.add_argument('--image_height', type=int, default=32)
+    parser.add_argument('--image_width', type=int, default=32)
+    parser.add_argument('--train_dataset', type=str, default="cifar10_input/cifar10-train.txt")
+    parser.add_argument('--test_dataset', type=str, default="cifar10_input/cifar10-test.txt")
+    parser.add_argument('--num_classes', type=int, default=10)
+    parser.add_argument('--num_examples_per_epoch_for_train', type=int, default=50000)
+    parser.add_argument('--num_training_examples', type=int, default=50000)
+    parser.add_argument('--num_testing_examples',type=int,default=10000)
+    parser.add_argument('--datasetName', type=str, help='name of the dataset', default='cifar10')
+    parser.add_argument('--num_channels', type=int, default='3')
+    parser.add_argument('--top_1_accuracy', type=bool, help='top-1-accuracy', default=True)
+    parser.add_argument('--num_optimizers', type=int, help='number of mapping layers from teacher', default=1)
     FLAGS, unparsed = parser.parse_known_args()
     ex = Resnet()
     tf.app.run(main=ex.main, argv=[sys.argv[0]] + unparsed)

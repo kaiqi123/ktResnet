@@ -8,7 +8,7 @@ from tensorflow.python.keras.layers import BatchNormalization
 from tensorflow.python.keras import backend as K
 
 
-class Teacher(object):
+class Model(object):
 
     def __init__(self, num_channels, seed, trainable=True):
         self.trainable = trainable
@@ -91,15 +91,33 @@ class Teacher(object):
         print(self.softmax)
         return self
 
-    def build_vgg_conv1fc1(self, rgb, num_classes):
+    def build_conv1fc1(self, rgb, num_classes):
 
-        print("build_vgg_conv1fc1")
+        print("build_conv1fc1")
         K.set_learning_phase(True)
         conv = self.Convolution(rgb, self.num_channels, 16, 1)
         relu = tf.nn.relu(conv, name='relu')
         #batchNorm = BatchNormalization(axis=-1, name='BatchNormal')(relu)
         self.fc = self.FullyConnect(relu, num_classes)
         self.softmax = tf.nn.softmax(self.fc)
+        return self
+
+    def build_resnet_conv1Block1Fc1(self, rgb, num_classes, k):
+        print("build_resnet_conv1Block1Fc1")
+        K.set_learning_phase(True)
+        nStages = [16, 16 * k, 32 * k, 64 * k]
+        conv1 = self.Convolution(rgb, self.num_channels, nStages[0], 1)
+        print(conv1)
+        block = self.basic_block(conv1,  nStages[0],  nStages[1], 2)
+        print(block)
+        batchNorm = BatchNormalization(axis=-1, name='BatchNormal')(block)
+        relu = tf.nn.relu(batchNorm, name='relu')
+        averagePool = tf.nn.avg_pool(relu, ksize=[1, 8, 8, 1], strides=[1, 1, 1, 1], padding='SAME', name='averagePool')
+        print(averagePool)
+        self.fc = self.FullyConnect(averagePool, num_classes)
+        print(self.fc)
+        self.softmax = tf.nn.softmax(self.fc)
+        print(self.softmax)
         return self
 
     def loss(self, labels):
