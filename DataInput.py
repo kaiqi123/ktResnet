@@ -14,6 +14,8 @@ class DataInput(object):
 		self.num_channels = num_channels
 		self.seed = seed
 		self.dataset = dataset
+		# new add
+		self.pad = 4
 
 		# Create the File Name queue
 		self.filename_queue = tf.train.string_input_producer([self.dataset_path + self.train_labels_file], num_epochs=None)
@@ -24,13 +26,12 @@ class DataInput(object):
 		self.record_defaults = [[1], ['']]
 		self.col1, self.col2 = tf.decode_csv(
 		self.value_temp, record_defaults=self.record_defaults)
-    
+
 		# Decode the data into JPEG
 		self.decode_jpeg()
 
 		# setup the input pipeline
 		self.input_pipeline(batch_size)
-
 
 	def input_pipeline(self, batch_size,num_epochs=None):
 		self.min_after_dequeue = 10000
@@ -39,7 +40,6 @@ class DataInput(object):
 		    	[self.train_image, self.col1], batch_size=batch_size, capacity=self.capacity,
              		min_after_dequeue=self.min_after_dequeue, seed=self.seed)
 		return self.example_batch, self.label_batch
-
 
 	def decode_jpeg(self):
 		
@@ -55,10 +55,12 @@ class DataInput(object):
 			self.train_image = tf.image.resize_images(self.train_image, [self.image_width, self.image_height])
 
 		if self.dataset == 'cifar10':
-			self.train_image = tf.image.decode_png(file_content, channels=self.num_channels)
-			#self.train_image = tf.random_crop(self.train_image, [self.image_height, self.image_width])
-			distorted_image = tf.image.random_flip_left_right(self.train_image)
-			#distorted_image = tf.image.random_brightness(distorted_image, max_delta=63)
-			#distorted_image = tf.image.random_contrast(distorted_image, lower=0.2, upper=1.8)
-			self.train_image = tf.image.per_image_standardization(distorted_image)
-			self.train_image = tf.image.resize_images(self.train_image, [self.image_width, self.image_height])
+			train_image = tf.image.decode_png(file_content, channels=self.num_channels)
+			train_image = tf.image.per_image_standardization(train_image)
+			train_image = tf.image.resize_image_with_pad(train_image, self.image_width+self.pad, self.image_width+self.pad)
+			train_image = tf.image.random_flip_left_right(train_image)
+			self.train_image = tf.random_crop(train_image, [self.image_height, self.image_width], seed=self.seed)
+
+			# distorted_image = tf.image.random_flip_left_right(self.train_image)
+			# self.train_image = tf.image.per_image_standardization(distorted_image)
+			# self.train_image = tf.image.resize_images(self.train_image, [self.image_width, self.image_height])
