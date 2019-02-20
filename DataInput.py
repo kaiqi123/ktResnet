@@ -61,7 +61,7 @@ class DataInput(object):
 			train_image = tf.image.random_flip_left_right(train_image, name="flip")
 			print(train_image)
 			self.train_image = tf.random_crop(train_image, [self.image_height, self.image_width, 3], seed=self.seed, name="crop")
-			print(train_image)
+			print(self.train_image)
 
 			# distorted_image = tf.image.random_flip_left_right(self.train_image)
 			# self.train_image = tf.image.per_image_standardization(distorted_image)
