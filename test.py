@@ -57,6 +57,5 @@ def main():
 
     serial.save(output_dir + '/preprocessor.pkl', preprocessor)
 
-
 if __name__ == "__main__":
     main()
