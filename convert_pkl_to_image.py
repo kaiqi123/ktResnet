@@ -22,5 +22,5 @@ x = o.X
 y = o.y
 
 features = x.reshape((x.shape[0], 3, 32, 32)).transpose(0, 2, 3, 1)
-np.save("temp/temp.txt", features[0])
+np.savetxt("temp/temp.txt", features[0])
 print(features.shape)
