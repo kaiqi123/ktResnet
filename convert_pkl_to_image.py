@@ -7,6 +7,7 @@ def unpickle(file):
         dict = cPickle.load(fo)
     return dict
 
+print(CIFAR10.convert2image(CIFAR10.traintensor(1)))
 
 train = CIFAR10(which_set='train', gcn=55.)
 print(train.X.shape)
