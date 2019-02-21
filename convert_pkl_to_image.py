@@ -24,6 +24,7 @@ y = o.y
 #print(o.X)
 #print(o.y.shape)
 #print(o.y)
-print(x.shape[0])
+
 features = x.reshape((x.shape[0], 3, 32, 32)).transpose(0, 2, 3, 1)
-print(features)
+print(features.shape)
+print(x.shape[0])
