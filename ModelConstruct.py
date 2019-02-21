@@ -126,9 +126,9 @@ class Model(object):
 
     def training(self, loss, learning_rate, global_step):
         tf.summary.scalar('loss', loss)
-        #optimizer = tf.train.MomentumOptimizer(learning_rate, momentum = 0.9, use_nesterov = True )
+        # optimizer = tf.train.MomentumOptimizer(learning_rate, momentum = 0.9, use_nesterov = True )
         optimizer = tf.contrib.opt.MomentumWOptimizer(weight_decay=0.0005, learning_rate=learning_rate, momentum=0.9, use_nesterov=True)
-        #optimizer = tf.train.AdamOptimizer(learning_rate)
+        # optimizer = tf.train.AdamOptimizer(learning_rate)
         train_op = optimizer.minimize(loss, global_step=global_step)
         return train_op
 
