@@ -1,4 +1,5 @@
 import cPickle
+from pylearn2.datasets.cifar10 import CIFAR10
 
 def unpickle(file):
 
@@ -8,5 +9,8 @@ def unpickle(file):
 
 file = "cifar10/pylearn2_gcn_whitened/test.pkl"
 dict = unpickle(file)
-print(dict.keys())
+print(dict)
+
+train = CIFAR10(which_set='train', gcn=55.)
+print(train)
 
