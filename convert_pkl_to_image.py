@@ -12,5 +12,7 @@ dict = unpickle(file)
 print(dict)
 
 train = CIFAR10(which_set='train', gcn=55.)
-print(train.X)
+print(train.X.shape)
 print(type(train.X))
+print(train.Y.shape)
+print(type(train.Y))
