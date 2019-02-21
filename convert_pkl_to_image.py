@@ -14,11 +14,11 @@ features_origin = train.X.reshape((train.X.shape[0], 3, 32, 32)).transpose(0, 2,
 np.save("temp/temp_origin", features_origin[7000])
 print(features_origin.shape)
 
-np.save("cifar10/pylearn2_gcn_whitened/train_labels", train.y)
+np.save("temp/train_labels", train.y)
 print(train.y.shape)
 
 test = CIFAR10(which_set='test', gcn=55.)
-np.save("cifar10/pylearn2_gcn_whitened/test_labels", test.y)
+np.save("temp/test_labels", test.y)
 print(test.y.shape)
 
 """
