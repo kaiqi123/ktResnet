@@ -7,7 +7,7 @@ from pylearn2.datasets.cifar10 import CIFAR10
 import textwrap
 
 def main():
-    data_dir = string_utils.preprocess('${PYLEARN2_DATA_PATH}/cifar10_test')
+    data_dir = string_utils.preprocess('${PYLEARN2_DATA_PATH}/cifar10_study')
 
     print('Loading CIFAR-10 train dataset...')
     train = CIFAR10(which_set='train', gcn=55.)
