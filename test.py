@@ -56,6 +56,7 @@ with tf.Session() as sess:
     for i in range(1):
         image_feed = sess.run(image_batch)
         print(image_feed)
+        print(len(image_feed))
         # print(labels_feed)
 
     coord.request_stop()
