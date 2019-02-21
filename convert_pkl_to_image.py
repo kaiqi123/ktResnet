@@ -1,6 +1,5 @@
 import cPickle
 
-
 def unpickle(file):
 
     with open(file, 'rb') as fo:
@@ -9,5 +8,5 @@ def unpickle(file):
 
 file = "cifar10/pylearn2_gcn_whitened/test.pkl"
 dict = unpickle(file)
-print(dict.keys)
+print(dict)
 
