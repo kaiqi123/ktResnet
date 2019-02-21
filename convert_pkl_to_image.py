@@ -15,6 +15,7 @@ def unpickle(file):
 #print(train.y.shape)
 #print(train.y)
 
+
 file = "cifar10/pylearn2_gcn_whitened/train.pkl"
 o = unpickle(file)
 x = o.X
