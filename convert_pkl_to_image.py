@@ -9,5 +9,5 @@ def unpickle(file):
 
 file = "cifar10/pylearn2_gcn_whitened/test.pkl"
 dict = unpickle(file)
-print(dict)
+print(dict.keys)
 
