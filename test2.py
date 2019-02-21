@@ -34,19 +34,6 @@ with tf.Session() as sess:
     threads = tf.train.start_queue_runners(sess=sess, coord=coord)
     sess.run(tf.initialize_all_variables())
 
-    for i in range(1):
-        images_one_batch = sess.run(image_batch)
-        images_feed = []
-        labels_feed = []
-        for id_sample in range(len(images_one_batch)):
-            image = images_one_batch[id_sample]
-            images_feed.append(image["feature"])
-            labels_feed.append(image["label"])
-        images_feed = np.array(images_feed)
-        labels_feed = np.array(labels_feed)
-        #print(images_feed.shape)
-        #print(labels_feed.shape)
-
     coord.request_stop()
     coord.join(threads)
 
