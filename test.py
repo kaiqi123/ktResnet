@@ -64,8 +64,8 @@ with tf.Session() as sess:
             labels_feed.append(image["label"])
         images_feed = np.array(images_feed)
         labels_feed = np.array(labels_feed)
-        print(images_feed.shape)
-        print(labels_feed.shape)
+        #print(images_feed.shape)
+        #print(labels_feed.shape)
 
     coord.request_stop()
     coord.join(threads)

@@ -59,6 +59,8 @@ with tf.Session() as sess:
         images_feed, labels_feed = sess.run([example_batch, label_batch])
         print(images_feed.shape)
         print(labels_feed)
+        print(type(images_feed))
+        print(type(labels_feed))
 
     coord.request_stop()
     coord.join(threads)
