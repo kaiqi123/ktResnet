@@ -12,5 +12,5 @@ dict = unpickle(file)
 print(dict)
 
 train = CIFAR10(which_set='train', gcn=55.)
-print(train.data_batch_1)
-
+print(train.X)
+print(type(train.X))
