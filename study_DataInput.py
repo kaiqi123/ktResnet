@@ -53,8 +53,6 @@ with tf.Session() as sess:
     #tf.set_random_seed(1234)
     coord = tf.train.Coordinator()
     threads = tf.train.start_queue_runners(sess=sess, coord=coord)
-
-
     sess.run(tf.initialize_all_variables())
 
     for i in range(1):
