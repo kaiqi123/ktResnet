@@ -109,9 +109,9 @@ class Model(object):
         conv1 = self.Convolution(rgb, self.num_channels, nStages[0], 1)
         print(conv1)
         block = self.basic_block(conv1,  nStages[0],  nStages[1], 2)
-        print(block)
         batchNorm = BatchNormalization(axis=-1, name='BatchNormal')(block)
         relu = tf.nn.relu(batchNorm, name='relu')
+        print(relu)
         averagePool = tf.nn.avg_pool(relu, ksize=[1, 8, 8, 1], strides=[1, 1, 1, 1], padding='SAME', name='averagePool')
         print(averagePool)
         self.fc = self.FullyConnect(averagePool, num_classes)
@@ -126,9 +126,9 @@ class Model(object):
 
     def training(self, loss, learning_rate, global_step):
         tf.summary.scalar('loss', loss)
-        #optimizer = tf.train.MomentumOptimizer(learning_rate, momentum = 0.9, use_nesterov = True )
+        # optimizer = tf.train.MomentumOptimizer(learning_rate, momentum = 0.9, use_nesterov = True )
         optimizer = tf.contrib.opt.MomentumWOptimizer(weight_decay=0.0005, learning_rate=learning_rate, momentum=0.9, use_nesterov=True)
-        #optimizer = tf.train.AdamOptimizer(learning_rate)
+        # optimizer = tf.train.AdamOptimizer(learning_rate)
         train_op = optimizer.minimize(loss, global_step=global_step)
         return train_op
 
