@@ -36,7 +36,7 @@ with tf.Session() as sess:
     sess.run(tf.initialize_all_variables())
 
     for i in range(1):
-        images_feed = sess.run([example_batch])
+        images_feed = sess.run(example_batch)
         print(images_feed.shape)
         #print(labels_feed)
 
