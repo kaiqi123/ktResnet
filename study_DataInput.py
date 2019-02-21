@@ -64,6 +64,5 @@ with tf.Session() as sess:
         print(images_feed.shape)
         print(labels_feed)
 
-
     coord.request_stop()
     coord.join(threads)
