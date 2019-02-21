@@ -49,7 +49,6 @@ example_batch, label_batch = tf.train.shuffle_batch (
 
 with tf.Session() as sess:
 
-    #tf.set_random_seed(1234)
     coord = tf.train.Coordinator()
     threads = tf.train.start_queue_runners(sess=sess, coord=coord)
     sess.run(tf.initialize_all_variables())
