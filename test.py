@@ -5,7 +5,7 @@ from pylearn2.datasets import preprocessing
 from pylearn2.utils import string_utils
 from pylearn2.datasets.cifar10 import CIFAR10
 import textwrap
-PYLEARN2_DATA_PATH = "."
+#PYLEARN2_DATA_PATH = "."
 
 def main():
     data_dir = string_utils.preprocess('${PYLEARN2_DATA_PATH}/cifar10_test')
