@@ -19,6 +19,6 @@ for i in range(x.shape[0]):
     one["label"] = y[i]
     images_list.append(one)
 
-images_queue = tf.train.input_producer(images_list)
-# print(images_queue)
+image = tf.train.slice_input_producer(images_list)
+print(image)
 
