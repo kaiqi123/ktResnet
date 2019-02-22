@@ -1,5 +1,6 @@
 import tensorflow as tf
 import numpy as np
+import os
 
 test_dataset = "cifar10_input/cifar10-test.txt"
 batch_size = 128
@@ -10,6 +11,9 @@ num_channels = 3
 seed = 1234
 pad = 4
 
+os.chdir(r'/home/users/kaiqi/ktResnet/')
+print(os.getcwd())
+
 filename_queue = tf.train.string_input_producer([test_dataset], num_epochs=None)
 reader = tf.TextLineReader()
 key_temp, value_temp = reader.read(filename_queue)
@@ -19,6 +23,9 @@ col1, col2 = tf.decode_csv(value_temp, record_defaults=record_defaults)
 print(col1, col2)
 
 file_content = tf.read_file(col2)
+print(file_content)
+
+"""
 train_image = tf.image.decode_png(file_content, channels=num_channels)
 train_image = tf.image.per_image_standardization(train_image)
 train_image = tf.image.resize_image_with_pad(train_image, image_width + pad, image_width + pad)
@@ -50,3 +57,4 @@ with tf.Session() as sess:
 
     coord.request_stop()
     coord.join(threads)
+"""
