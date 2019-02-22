@@ -23,7 +23,7 @@ def deal_npy_file(whitenFile_label, whitenFile_feature, txtfile, mode):
 
 
 print(os.getcwd())
-os.chdir(r'~/ktResnet/')
+os.chdir(r'/home/users/kaiqi/ktResnet/')
 print(os.getcwd())
 
 # input file
