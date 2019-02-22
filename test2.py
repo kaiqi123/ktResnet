@@ -23,10 +23,19 @@ def deal_npy_file(whitenFile_label, whitenFile_feature, txtfile, mode):
     print(len(file_names))
 
 
+"""
 # input file
 whitenFile_label = "cifar10/pylearn2_gcn_whitened/train_labels.npy"
 whitenFile_feature = "cifar10/pylearn2_gcn_whitened/train.npy"
 # ouput file
 txtfile = "cifar10_npy/cifar10-train.txt"
 mode = "train"
+deal_npy_file(whitenFile_label, whitenFile_feature, txtfile, mode)
+"""
+
+whitenFile_label = "cifar10/pylearn2_gcn_whitened/test_labels.npy"
+whitenFile_feature = "cifar10/pylearn2_gcn_whitened/test.npy"
+# ouput file
+txtfile = "cifar10_npy/cifar10-test.txt"
+mode = "test"
 deal_npy_file(whitenFile_label, whitenFile_feature, txtfile, mode)
