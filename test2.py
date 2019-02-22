@@ -16,9 +16,8 @@ def deal_npy_file(whitenFile_label, whitenFile_feature, txtfile, mode):
     serial.mkdir(output_dir)
     file_names = []
     for i in range(x.shape[0]):
-        name = output_dir + "/" + str(y[i][0]) + "," + mode + str(i)
-        np.save(name, x[i])
-        file_names.append(name+"\n")
+        np.save(output_dir + "/" + str(y[i][0]) + "," + mode + str(i), x[i])
+        file_names.append(str(y[i][0]) + "," + output_dir + "/" + mode + str(i) + "\n")
 
     open(txtfile, "w").writelines(file_names)
     print(len(file_names))
