@@ -30,6 +30,7 @@ dataset = 'cifar10'
 filename_queue = tf.train.string_input_producer([dataset_path + test_dataset], num_epochs=None)
 reader = tf.TextLineReader()
 key_temp, value_temp = reader.read(filename_queue)
+print(value_temp)
 record_defaults = [[1], ['']]
 col1, col2 = tf.decode_csv(value_temp, record_defaults=record_defaults)
 

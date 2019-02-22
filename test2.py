@@ -23,12 +23,9 @@ for i in range(x.shape[0]):
 print(len(image_list))
 
 image_queue = tf.train.input_producer(image_list)
-min_after_dequeue = 10000
-capacity = min_after_dequeue + 3 * batch_size
-image_batch = tf.train.shuffle_batch(
-    image_queue, batch_size=batch_size, capacity=capacity,
-            min_after_dequeue=min_after_dequeue, seed=seed)
 
-print(image_batch)
+train_image = tf.image.per_image_standardization(image_queue)
+
+print(train_image)
 
 print("1111111")
