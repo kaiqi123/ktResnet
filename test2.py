@@ -20,4 +20,5 @@ for i in range(x.shape[0]):
     images_list.append(one)
 
 images_queue = tf.train.input_producer(images_list)
-print(images_queue)
+# print(images_queue)
+
