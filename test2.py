@@ -17,13 +17,12 @@ def deal_npy_file(whitenFile_label, whitenFile_feature, txtfile, mode):
     file_names = []
     for i in range(x.shape[0]):
         np.save(output_dir + "/" + str(y[i][0]) + "," + mode + str(i), x[i])
-        file_names.append(str(y[i][0]) + "," + output_dir + "/" + mode + str(i) + "\n")
+        file_names.append(str(y[i][0]) + "," + output_dir + "/" + mode + str(i) + ".npy" + "\n")
 
     open(txtfile, "w").writelines(file_names)
     print(len(file_names))
 
 
-"""
 # input file
 whitenFile_label = "cifar10/pylearn2_gcn_whitened/train_labels.npy"
 whitenFile_feature = "cifar10/pylearn2_gcn_whitened/train.npy"
@@ -31,7 +30,7 @@ whitenFile_feature = "cifar10/pylearn2_gcn_whitened/train.npy"
 txtfile = "cifar10_npy/cifar10-train.txt"
 mode = "train"
 deal_npy_file(whitenFile_label, whitenFile_feature, txtfile, mode)
-"""
+
 
 whitenFile_label = "cifar10/pylearn2_gcn_whitened/test_labels.npy"
 whitenFile_feature = "cifar10/pylearn2_gcn_whitened/test.npy"
