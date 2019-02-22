@@ -12,7 +12,7 @@ def deal_npy_file(whitenFile_label, whitenFile_feature, txtfile, mode):
     x = x.reshape((x.shape[0], 3, 32, 32)).transpose(0, 2, 3, 1)
     print(x.shape)
 
-    output_dir = "cifar10_npy/" + mode
+    output_dir = "./cifar10_npy/" + mode
     serial.mkdir(output_dir)
     file_names = []
     for i in range(x.shape[0]):
@@ -26,6 +26,7 @@ def deal_npy_file(whitenFile_label, whitenFile_feature, txtfile, mode):
 os.chdir(r'/home/users/kaiqi/ktResnet/')
 print(os.getcwd())
 
+"""
 # input file
 whitenFile_label = "cifar10/pylearn2_gcn_whitened/train_labels.npy"
 whitenFile_feature = "cifar10/pylearn2_gcn_whitened/train.npy"
@@ -33,11 +34,11 @@ whitenFile_feature = "cifar10/pylearn2_gcn_whitened/train.npy"
 txtfile = "cifar10_npy/cifar10-train.txt"
 mode = "train"
 deal_npy_file(whitenFile_label, whitenFile_feature, txtfile, mode)
+"""
 
-
-whitenFile_label = "cifar10/pylearn2_gcn_whitened/test_labels.npy"
-whitenFile_feature = "cifar10/pylearn2_gcn_whitened/test.npy"
+whitenFile_label = "./cifar10/pylearn2_gcn_whitened/test_labels.npy"
+whitenFile_feature = "./cifar10/pylearn2_gcn_whitened/test.npy"
 # ouput file
-txtfile = "cifar10_npy/cifar10-test.txt"
+txtfile = "./cifar10_npy/cifar10-test.txt"
 mode = "test"
 deal_npy_file(whitenFile_label, whitenFile_feature, txtfile, mode)
