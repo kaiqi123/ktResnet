@@ -6,9 +6,9 @@ batch_size = 128
 seed = 1234
 
 y = np.load("cifar10/pylearn2_gcn_whitened/train_labels.npy")
-print(y)
-y = list(y)
-print(y)
+print(y[0])
+#y = list(y)
+print(y[0][0])
 
 """
 x = np.load("cifar10/pylearn2_gcn_whitened/train.npy")
