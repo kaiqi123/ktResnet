@@ -2,6 +2,7 @@ import numpy as np
 from pylearn2.utils import serial
 import os
 
+
 # convert_whiten npyFile to a txtfile for input and multi Npy Files
 def deal_npy_file(whitenFile_label, whitenFile_feature, txtfile, mode):
     y = np.load(whitenFile_label)
@@ -22,7 +23,6 @@ def deal_npy_file(whitenFile_label, whitenFile_feature, txtfile, mode):
     print(len(file_names))
 
 
-print(os.getcwd())
 os.chdir(r'/home/users/kaiqi/ktResnet/')
 print(os.getcwd())
 

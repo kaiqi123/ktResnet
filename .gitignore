@@ -3,3 +3,4 @@ cifar10
 cifar10_input
 summary-log
 tensorboard
+cifar10_npy
