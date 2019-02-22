@@ -17,6 +17,7 @@ for i in range(x.shape[0]):
     one = {}
     one["feature"] = x[i]
     one["label"] = y[i]
+    one = tf.convert_to_tensor(one)
     images_list.append(one)
 
 image = tf.train.slice_input_producer(images_list)
