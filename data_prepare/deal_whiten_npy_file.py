@@ -22,7 +22,9 @@ def deal_npy_file(whitenFile_label, whitenFile_feature, txtfile, mode):
     print(len(file_names))
 
 
+print(os.getcwd())
 os.chdir(r'~/ktResnet/')
+print(os.getcwd())
 
 # input file
 whitenFile_label = "cifar10/pylearn2_gcn_whitened/train_labels.npy"
