@@ -8,7 +8,7 @@ image_width = 32
 image_height = 32
 num_channels = 3
 seed = 1234
-
+pad = 4
 
 filename_queue = tf.train.string_input_producer([test_dataset], num_epochs=None)
 reader = tf.TextLineReader()
