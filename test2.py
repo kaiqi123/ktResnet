@@ -12,6 +12,9 @@ x = np.load("cifar10/pylearn2_gcn_whitened/train.npy")
 x = x.reshape((x.shape[0], 3, 32, 32)).transpose(0, 2, 3, 1)
 print(x.shape)
 
-output_dir = "ciafr10_npy/train"
+output_dir = "cifar10_npy/train"
 serial.mkdir(output_dir)
+for i in range(x.shape[0]):
+    np.save(output_dir+"/"+str(y[i])+",train"+str(i), x[i])
+
 
