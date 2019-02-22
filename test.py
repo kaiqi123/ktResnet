@@ -25,7 +25,7 @@ print(col1, col2)
 file_content = tf.read_file(col2)
 print(file_content)
 
-"""
+
 train_image = tf.image.decode_png(file_content, channels=num_channels)
 train_image = tf.image.per_image_standardization(train_image)
 train_image = tf.image.resize_image_with_pad(train_image, image_width + pad, image_width + pad)
@@ -57,4 +57,3 @@ with tf.Session() as sess:
 
     coord.request_stop()
     coord.join(threads)
-"""
