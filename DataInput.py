@@ -23,7 +23,6 @@ train_image = tf.image.per_image_standardization(train_image)
 train_image = tf.image.resize_image_with_pad(train_image, image_width + pad, image_width + pad)
 train_image = tf.image.random_flip_left_right(train_image)
 train_image = tf.random_crop(train_image, [image_height, image_width, 3], seed=seed, name="crop")
-print(train_image)
 
 min_after_dequeue = 10000
 capacity = min_after_dequeue + 3 * batch_size
@@ -40,7 +39,7 @@ with tf.Session() as sess:
 
     for i in range(1):
 
-        col1, col2 = sess.run(col1, col2)
+        col1, col2 = sess.run([col1, col2])
         print(col1, col2)
 
         images_feed, labels_feed = sess.run([example_batch, label_batch])
