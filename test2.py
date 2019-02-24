@@ -10,17 +10,23 @@ def deal_npy_file(whitenFile_label, whitenFile_feature, txtfile, mode):
     print(y.shape)
 
     x = np.load(whitenFile_feature)
-    x = x.reshape((x.shape[0], 3, 32, 32)).transpose(0, 2, 3, 1)
+    #x = x.reshape((x.shape[0], 3, 32, 32)).transpose(0, 2, 3, 1)
+    x = x.reshape(x.shape[0], 3, 32, 32)
     print(x.shape)
 
     output_dir = "./cifar10_images_from_npy/" + mode
     serial.mkdir(output_dir)
     i = 7000
+    print(x[i].shape)
     #file_names = []
     #for i in range(x.shape[0]):
 
-    im = Image.fromarray(x[i].astype('uint8'))
-    im.save(output_dir + "/" + mode + str(i) + ".png")
+    img = x[i]
+    i0 = Image.fromarray(img[0])
+    i1 = Image.fromarray(img[1])
+    i2 = Image.fromarray(img[2])
+    img = Image.merge("RGB", (i0, i1, i2))
+    img.save(output_dir + "/" + mode + str(i) + ".png")
 
     #file_names.append(str(y[i][0]) + "," + output_dir + "/" + mode + str(i) + ".npy" + "\n")
 
