@@ -3,7 +3,7 @@ import numpy as np
 # import matplotlib.pyplot as plt
 # import matplotlib.image as plimg
 from PIL import Image
-
+import os
 
 def load_CIFAR_batch(filename):
     with open(filename, 'rb')as f:
@@ -23,6 +23,10 @@ def load_CIFAR_Labels(filename):
 
 
 if __name__ == "__main__":
+
+    os.chdir(r'/home/users/kaiqi/ktResnet/')
+    print(os.getcwd())
+
     load_CIFAR_Labels("./cifar10/cifar-10-batches-py/batches.meta")
     imgX, imgY = load_CIFAR_batch("./cifar10/cifar-10-batches-py/data_batch_1")
     print(imgX.shape)
