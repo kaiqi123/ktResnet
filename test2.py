@@ -22,9 +22,9 @@ def deal_npy_file(whitenFile_label, whitenFile_feature, txtfile, mode):
     #for i in range(x.shape[0]):
 
     img = x[i]
-    i0 = Image.fromarray(img[0])
-    i1 = Image.fromarray(img[1])
-    i2 = Image.fromarray(img[2])
+    i0 = Image.fromarray(img[0]).convert('L')
+    i1 = Image.fromarray(img[1]).convert('L')
+    i2 = Image.fromarray(img[2]).convert('L')
     img = Image.merge("RGB", (i0, i1, i2))
     img.save(output_dir + "/" + mode + str(i) + ".png")
 
