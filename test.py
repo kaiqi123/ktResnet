@@ -27,6 +27,7 @@ def deal_npy_file(whitenFile_label, whitenFile_feature, txtfile, mode):
     #plt.show()
 
 
+
 # input file
 whitenFile_label = "./cifar10/pylearn2_gcn_whitened/train_labels.npy"
 whitenFile_feature = "./cifar10/pylearn2_gcn_whitened/train.npy"
