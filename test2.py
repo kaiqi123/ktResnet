@@ -15,7 +15,7 @@ def deal_npy_file(whitenFile_label, whitenFile_feature, txtfile, mode):
 
     output_dir = "./cifar10_images_from_npy/" + mode
     serial.mkdir(output_dir)
-    i = 0
+    i = 7000
     #file_names = []
     #for i in range(x.shape[0]):
 
@@ -32,9 +32,10 @@ os.chdir(r'/home/users/kaiqi/ktResnet/')
 print(os.getcwd())
 
 
-whitenFile_label = "./cifar10/pylearn2_gcn_whitened/test_labels.npy"
-whitenFile_feature = "./cifar10/pylearn2_gcn_whitened/test.npy"
+# input file
+whitenFile_label = "./cifar10/pylearn2_gcn_whitened/train_labels.npy"
+whitenFile_feature = "./cifar10/pylearn2_gcn_whitened/train.npy"
 # ouput file
-txtfile = "./cifar10_input/cifar10-test.txt"
-mode = "test"
+txtfile = "./cifar10_input/cifar10-train.txt"
+mode = "train"
 deal_npy_file(whitenFile_label, whitenFile_feature, txtfile, mode)
