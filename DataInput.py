@@ -1,5 +1,6 @@
 import tensorflow as tf
 
+
 class DataInput(object):
 
     def __init__(self, dataset_file, batch_size, image_width, image_height, num_channels, seed, pad, datasetName):

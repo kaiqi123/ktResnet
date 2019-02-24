@@ -8,7 +8,7 @@ import argparse
 from tensorflow.python.client import device_lib
 
 tf.reset_default_graph()
-NUM_ITERATIONS = 2
+NUM_ITERATIONS = 78200
 TeacherModel_K = 10
 Depth = 28
 TeacherModel_N = (Depth - 4) / 6
@@ -17,6 +17,7 @@ Num_Epoch_Per_Decay = 60
 learningRateDecayRatio = 0.2
 test_accuracy_list = []
 Pad = 4
+
 
 class Resnet(object):
 
@@ -89,6 +90,7 @@ class Resnet(object):
 
     def define_teacher(self, images_placeholder, labels_placeholder, global_step, sess):
 
+        print("Define Teacher")
         mentor = Model(FLAGS.num_channels, SEED)
         mentor_data_dict = mentor.build_teacher_model(images_placeholder, FLAGS.num_classes, TeacherModel_K, TeacherModel_N)
         #mentor_data_dict = mentor.build_vgg_conv1fc1(images_placeholder, FLAGS.num_classes)
@@ -131,7 +133,7 @@ class Resnet(object):
     def train_model(self, data_input_train, data_input_test, images_placeholder, labels_placeholder, sess, phase_train):
 
         try:
-            print('train model')
+            print('Begin to train model...')
 
             eval_correct = self.evaluation(self.softmax, labels_placeholder)
 
