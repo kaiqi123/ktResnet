@@ -38,7 +38,6 @@ def deal_npy_file(whitenFile_label, whitenFile_feature, txtfile, mode):
 os.chdir(r'/home/users/kaiqi/ktResnet/')
 print(os.getcwd())
 
-
 # input file
 whitenFile_label = "./cifar10/pylearn2_gcn_whitened/test_labels.npy"
 whitenFile_feature = "./cifar10/pylearn2_gcn_whitened/test.npy"
