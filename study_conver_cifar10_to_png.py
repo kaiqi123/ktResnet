@@ -1,7 +1,7 @@
 import pickle as p
 import numpy as np
-import matplotlib.pyplot as plt
-import matplotlib.image as plimg
+# import matplotlib.pyplot as plt
+# import matplotlib.image as plimg
 from PIL import Image
 
 
