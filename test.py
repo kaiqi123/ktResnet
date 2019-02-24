@@ -21,6 +21,7 @@ record_defaults = [[1], ['']]
 col1, col2 = tf.decode_csv(value_temp, record_defaults=record_defaults)
 
 file_content = tf.read_file(col2)
+train_image = tf.image.decode_image(file_content, channels=num_channels)
 # train_image = tf.image.per_image_standardization(file_content)
 # file_content = np.load(col2)
 # print(file_content)
@@ -55,8 +56,8 @@ with tf.Session() as sess:
         print(type(labels_feed))
         """
 
-        file_content = sess.run(file_content)
-        print(file_content.shape)
+        train_image = sess.run(train_image)
+        print(train_image)
 
     coord.request_stop()
     coord.join(threads)
