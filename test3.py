@@ -1,7 +1,4 @@
 import tensorflow as tf
-import numpy as np
-from DataInput import DataInput
-
 
 test_dataset = "./cifar10_input/cifar10-train.txt"
 batch_size = 128

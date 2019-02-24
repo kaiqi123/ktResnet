@@ -1,6 +1,6 @@
 import tensorflow as tf
 import numpy as np
-from DataInput import DataInput
+from DataInput_origin import DataInput
 
 """
 dataset_path = "./"

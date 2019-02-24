@@ -1,13 +1,9 @@
 import tensorflow as tf
 import numpy as np
-import random
-from DataInput import DataInput
+from temp.DataInput_origin import DataInput
 from ModelConstruct import Model
-import os
 import time
-import pdb
 import sys
-from tensorflow.python import debug as tf_debug
 import argparse
 from tensorflow.python.client import device_lib
 
