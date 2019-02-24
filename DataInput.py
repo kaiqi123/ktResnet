@@ -38,8 +38,7 @@ with tf.Session() as sess:
     sess.run(tf.initialize_all_variables())
 
     for i in range(1):
-
-        col1, col2 = sess.run([filename_queue, col1, col2])
+        filename_queue, col1, col2 = sess.run([filename_queue, col1, col2])
         print(filename_queue, col1, col2)
 
         images_feed, labels_feed = sess.run([example_batch, label_batch])
