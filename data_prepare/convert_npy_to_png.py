@@ -39,9 +39,18 @@ os.chdir(r'/home/users/kaiqi/ktResnet/')
 print(os.getcwd())
 
 # input file
+whitenFile_label = "./cifar10/pylearn2_gcn_whitened/train_labels.npy"
+whitenFile_feature = "./cifar10/pylearn2_gcn_whitened/train.npy"
+# ouput file
+txtfile = "./cifar10_input/cifar10-train-plt.txt"
+mode = "train"
+deal_npy_file(whitenFile_label, whitenFile_feature, txtfile, mode)
+
+# input file
 whitenFile_label = "./cifar10/pylearn2_gcn_whitened/test_labels.npy"
 whitenFile_feature = "./cifar10/pylearn2_gcn_whitened/test.npy"
 # ouput file
 txtfile = "./cifar10_input/cifar10-test-plt.txt"
 mode = "test"
 deal_npy_file(whitenFile_label, whitenFile_feature, txtfile, mode)
+
