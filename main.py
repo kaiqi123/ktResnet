@@ -1,6 +1,6 @@
 import tensorflow as tf
 import numpy as np
-from temp.DataInput_origin import DataInput
+from DataInput import DataInput
 from ModelConstruct import Model
 import time
 import sys
@@ -8,16 +8,15 @@ import argparse
 from tensorflow.python.client import device_lib
 
 tf.reset_default_graph()
-NUM_ITERATIONS = 7820
+NUM_ITERATIONS = 2
 TeacherModel_K = 10
 Depth = 28
 TeacherModel_N = (Depth - 4) / 6
 SEED = 1234
-Dataset_Path = "./"
 Num_Epoch_Per_Decay = 60
 learningRateDecayRatio = 0.2
 test_accuracy_list = []
-
+Pad = 4
 
 class Resnet(object):
 
@@ -191,12 +190,13 @@ class Resnet(object):
             # set the seed so that we have same loss values and initializations for every run.
             tf.set_random_seed(SEED)
 
-            data_input_train = DataInput(Dataset_Path, FLAGS.train_dataset, FLAGS.batch_size,
-                                         FLAGS.num_training_examples, FLAGS.image_width, FLAGS.image_height,
-                                         FLAGS.num_channels, SEED, FLAGS.datasetName)
+            data_input_train = DataInput()
+            data_input_train = data_input_train.input_data_into_pipeline(FLAGS.train_dataset, FLAGS.batch_size, FLAGS.image_width, FLAGS.image_height,
+                      FLAGS.num_channels, SEED, Pad, FLAGS.datasetName)
 
-            data_input_test = DataInput(Dataset_Path, FLAGS.test_dataset, FLAGS.batch_size, FLAGS.num_testing_examples,
-                                        FLAGS.image_width, FLAGS.image_height, FLAGS.num_channels, SEED, FLAGS.datasetName)
+            data_input_test = DataInput()
+            data_input_test = data_input_test.input_data_into_pipeline(FLAGS.test_dataset, FLAGS.batch_size, FLAGS.image_width, FLAGS.image_height,
+                                        FLAGS.num_channels, SEED, Pad, FLAGS.datasetName)
 
             images_placeholder = tf.placeholder(tf.float32,
                                                 shape=(FLAGS.batch_size, FLAGS.image_height,

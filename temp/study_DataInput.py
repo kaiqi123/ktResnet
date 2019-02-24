@@ -1,45 +1,28 @@
 import tensorflow as tf
-import numpy as np
-from DataInput_origin import DataInput
 
-"""
-dataset_path = "./"
-test_dataset = "cifar10_input/cifar10-test.txt"
-batch_size = 3
-num_testing_examples = 1829
-image_width = 224
-image_height = 224
-num_channels = 3
-seed = 1234
-dataset = 'caltech101'
-"""
-dataset_path = "./"
-test_dataset = "cifar10_input/cifar10-test.txt"
+
+dataset = "./cifar10_input/cifar10-test-plt.txt"
 batch_size = 128
 num_testing_examples = 10000
 image_width = 32
 image_height = 32
 num_channels = 3
 seed = 1234
-dataset = 'cifar10'
+datasetName = 'cifar10'
+pad = 4
 
-#data_input_test = DataInput(dataset_path, test_dataset, batch_size, num_testing_examples,
-#                                        image_width, image_height, num_channels, seed, dataset)
-
-
-filename_queue = tf.train.string_input_producer([dataset_path + test_dataset], num_epochs=None)
+filename_queue = tf.train.string_input_producer([dataset], num_epochs=None)
 reader = tf.TextLineReader()
 key_temp, value_temp = reader.read(filename_queue)
-print(value_temp)
 record_defaults = [[1], ['']]
 col1, col2 = tf.decode_csv(value_temp, record_defaults=record_defaults)
 
 file_content = tf.read_file(col2)
-
-train_image = tf.image.decode_jpeg(file_content, channels=num_channels)
-distorted_image = tf.image.random_flip_left_right(train_image)
-train_image = tf.image.per_image_standardization(distorted_image)
-train_image = tf.image.resize_images(train_image, [image_width, image_height])
+train_image = tf.image.decode_png(file_content, channels=num_channels)
+train_image = tf.image.per_image_standardization(train_image)
+train_image = tf.image.resize_image_with_pad(train_image, image_width + pad, image_width + pad)
+train_image = tf.image.random_flip_left_right(train_image)
+train_image = tf.random_crop(train_image, [image_height, image_width, 3], seed=seed, name="crop")
 
 min_after_dequeue = 10000
 capacity = min_after_dequeue + 3 * batch_size
@@ -55,7 +38,8 @@ with tf.Session() as sess:
     sess.run(tf.initialize_all_variables())
 
     for i in range(1):
-        #images_feed, labels_feed = sess.run([data_input_test.example_batch, data_input_test.label_batch])
+        col1, col2 = sess.run([col1, col2])
+        print(col1, col2)
 
         images_feed, labels_feed = sess.run([example_batch, label_batch])
         print(images_feed.shape)
