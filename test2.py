@@ -17,7 +17,7 @@ def deal_npy_file(whitenFile_label, whitenFile_feature, txtfile, mode):
 
     output_dir = "./cifar10_images_from_npy/" + mode
     serial.mkdir(output_dir)
-    i = 7000
+    i = 0
     print(x[i].shape)
     #file_names = []
     #for i in range(x.shape[0]):
