@@ -10,8 +10,8 @@ def deal_npy_file(whitenFile_label, whitenFile_feature, txtfile, mode):
     print(y.shape)
 
     x = np.load(whitenFile_feature)
-    x = x.reshape((x.shape[0], 3, 32, 32)).transpose(0, 2, 3, 1)
-    #x = x.reshape(x.shape[0], 3, 32, 32)
+    #x = x.reshape((x.shape[0], 3, 32, 32)).transpose(0, 2, 3, 1)
+    x = x.reshape(x.shape[0], 3, 32, 32)
     print(x.shape)
 
     output_dir = "./cifar10_images_from_npy/" + mode
