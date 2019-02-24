@@ -24,8 +24,8 @@ def deal_npy_file(whitenFile_label, whitenFile_feature, txtfile, mode):
     output_dir = "./cifar10_images_from_npy/" + mode + "_plt"
     serial.mkdir(output_dir)
     file_names = []
-    #for i in range(x.shape[0]):
-    for i in range(1):
+    for i in range(x.shape[0]):
+    #for i in range(1):
         name = output_dir + "/" + mode + str(i) + "_plt.png"
         plt.imsave(name, x[i])
         # misc.imsave(name, x[i])
