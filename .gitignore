@@ -1,6 +1,6 @@
 cifar10_images
 cifar10
-cifar10_input
 summary-log
 tensorboard
 cifar10_npy
+cifar10_images_from_npy
