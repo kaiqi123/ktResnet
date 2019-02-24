@@ -19,7 +19,7 @@ def deal_npy_file(whitenFile_label, whitenFile_feature, txtfile, mode):
     #file_names = []
     #for i in range(x.shape[0]):
 
-    im = Image.fromarray(x[i])
+    im = Image.fromarray(x[i].astype('uint8'))
     im.save(output_dir + "/" + mode + str(i) + ".png")
 
     #file_names.append(str(y[i][0]) + "," + output_dir + "/" + mode + str(i) + ".npy" + "\n")
