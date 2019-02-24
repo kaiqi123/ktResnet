@@ -8,7 +8,7 @@ from PIL import Image
 def load_CIFAR_batch(filename):
     with open(filename, 'rb')as f:
         #        datadict = p.load(f)
-        datadict = p.load(f, encoding='latin1')
+        datadict = p.load(f)
         X = datadict['data']
         Y = datadict['labels']
         X = X.reshape(10000, 3, 32, 32)
