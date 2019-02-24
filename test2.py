@@ -10,9 +10,9 @@ def deal_npy_file(whitenFile_label, whitenFile_feature, txtfile, mode):
     print(y.shape)
 
     x = np.load(whitenFile_feature)
-    #x = x.reshape((x.shape[0], 3, 32, 32)).transpose(0, 2, 3, 1)
-    print(x.shape[0])
-    x = x.reshape(x.shape[0], 3, 32, 32)
+    x = x.reshape((x.shape[0], 3, 32, 32)).transpose(0, 2, 3, 1)
+    # print(x.shape[0])
+    # x = x.reshape(x.shape[0], 3, 32, 32)
     print(x.shape)
 
     output_dir = "./cifar10_images_from_npy/" + mode
@@ -23,10 +23,10 @@ def deal_npy_file(whitenFile_label, whitenFile_feature, txtfile, mode):
     #for i in range(x.shape[0]):
 
     img = x[i]
-    i0 = Image.fromarray(img[0]).convert('L')
-    i1 = Image.fromarray(img[1]).convert('L')
-    i2 = Image.fromarray(img[2]).convert('L')
-    img = Image.merge("RGB", (i0, i1, i2))
+    #i0 = Image.fromarray(img[0]).convert('L')
+    #i1 = Image.fromarray(img[1]).convert('L')
+    #i2 = Image.fromarray(img[2]).convert('L')
+    #img = Image.merge("RGB", (i0, i1, i2))
     name = output_dir + "/" + mode + str(i) + ".png"
     img.save(name, "png")
 
