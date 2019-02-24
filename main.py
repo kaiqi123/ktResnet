@@ -256,6 +256,7 @@ if __name__ == '__main__':
     parser.add_argument('--num_channels', type=int, default='3')
     parser.add_argument('--top_1_accuracy', type=bool, help='top-1-accuracy', default=True)
     parser.add_argument('--num_optimizers', type=int, help='number of mapping layers from teacher', default=1)
+    parser.add_argument('--num_examples_per_epoch_for_train', type=int, default=50000)
     FLAGS, unparsed = parser.parse_known_args()
     ex = Resnet()
     tf.app.run(main=ex.main, argv=[sys.argv[0]] + unparsed)
