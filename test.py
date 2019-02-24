@@ -1,40 +1,70 @@
+import tensorflow as tf
 import numpy as np
-from pylearn2.utils import serial
 import os
-from PIL import Image
 
-
-# convert_whiten npyFile to a txtfile for input and multi Npy Files
-def deal_npy_file(whitenFile_label, whitenFile_feature, txtfile, mode):
-    y = np.load(whitenFile_label)
-    print(y.shape)
-
-    x = np.load(whitenFile_feature)
-    x = x.reshape((x.shape[0], 3, 32, 32)).transpose(0, 2, 3, 1)
-    print(x.shape)
-
-    output_dir = "./cifar10_images_from_npy/" + mode
-    serial.mkdir(output_dir)
-    i = 0
-    #file_names = []
-    #for i in range(x.shape[0]):
-
-    im = Image.fromarray(x[i])
-    im.save(output_dir + "/" + mode + str(i) + ".png")
-
-    #file_names.append(str(y[i][0]) + "," + output_dir + "/" + mode + str(i) + ".npy" + "\n")
-
-    #open(txtfile, "w").writelines(file_names)
-    #print(len(file_names))
-
+test_dataset = "cifar10_input/cifar10-test.txt"
+batch_size = 128
+num_testing_examples = 10000
+image_width = 32
+image_height = 32
+num_channels = 3
+seed = 1234
+pad = 4
 
 os.chdir(r'/home/users/kaiqi/ktResnet/')
 print(os.getcwd())
 
+def read_npy_file(fileName):
+    data = np.load(fileName)
+    return data
 
-whitenFile_label = "./cifar10/pylearn2_gcn_whitened/test_labels.npy"
-whitenFile_feature = "./cifar10/pylearn2_gcn_whitened/test.npy"
-# ouput file
-txtfile = "./cifar10_input/cifar10-test.txt"
-mode = "test"
-deal_npy_file(whitenFile_label, whitenFile_feature, txtfile, mode)
+filename_queue = tf.train.string_input_producer([test_dataset], num_epochs=None)
+reader = tf.TextLineReader()
+key_temp, value_temp = reader.read(filename_queue)
+record_defaults = [[1], ['']]
+col1, col2 = tf.decode_csv(value_temp, record_defaults=record_defaults)
+
+dataset = tf.data.Dataset.from_tensor_slices(file_list)
+
+dataset = dataset.map(lambda item: tuple(tf.py_func(read_npy_file, [item], [tf.float32,])))
+
+train_image = tf.image.decode_png(file_content, channels=num_channels)
+# train_image = tf.image.per_image_standardization(file_content)
+# file_content = np.load(col2)
+# print(file_content)
+
+"""
+train_image = tf.image.per_image_standardization(file_content)
+train_image = tf.image.resize_image_with_pad(train_image, image_width + pad, image_width + pad)
+train_image = tf.image.random_flip_left_right(train_image)
+train_image = tf.random_crop(train_image, [image_height, image_width, 3], seed=seed, name="crop")
+print(train_image)
+
+min_after_dequeue = 10000
+capacity = min_after_dequeue + 3 * batch_size
+example_batch, label_batch = tf.train.shuffle_batch (
+        [train_image, col1], batch_size=batch_size, capacity=capacity,
+            min_after_dequeue=min_after_dequeue, seed=seed)
+"""
+
+with tf.Session() as sess:
+
+    coord = tf.train.Coordinator()
+    threads = tf.train.start_queue_runners(sess=sess, coord=coord)
+    sess.run(tf.initialize_all_variables())
+
+    for i in range(1):
+
+        """
+        images_feed, labels_feed = sess.run([example_batch, label_batch])
+        print(images_feed.shape)
+        print(labels_feed)
+        print(type(images_feed))
+        print(type(labels_feed))
+        """
+
+        file_content = sess.run(file_content)
+        print(file_content.shape)
+
+    coord.request_stop()
+    coord.join(threads)
