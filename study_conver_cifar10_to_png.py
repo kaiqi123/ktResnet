@@ -32,9 +32,9 @@ if __name__ == "__main__":
         img0 = imgs[0]
         img1 = imgs[1]
         img2 = imgs[2]
-        i0 = Image.fromarray(img0)
-        i1 = Image.fromarray(img1)
-        i2 = Image.fromarray(img2)
+        i0 = Image.fromarray(img0).convert('L')
+        i1 = Image.fromarray(img1).convert('L')
+        i2 = Image.fromarray(img2).convert('L')
         img = Image.merge("RGB", (i0, i1, i2))
         name = "img" + str(i) + '.png'
         img.save("./cifar10_images_from_npy/" + name, "png")
