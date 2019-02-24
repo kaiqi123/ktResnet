@@ -190,12 +190,10 @@ class Resnet(object):
             # set the seed so that we have same loss values and initializations for every run.
             tf.set_random_seed(SEED)
 
-            data_input_train = DataInput()
-            data_input_train = data_input_train.input_data_into_pipeline(FLAGS.train_dataset, FLAGS.batch_size, FLAGS.image_width, FLAGS.image_height,
+            data_input_train = DataInput(FLAGS.train_dataset, FLAGS.batch_size, FLAGS.image_width, FLAGS.image_height,
                       FLAGS.num_channels, SEED, Pad, FLAGS.datasetName)
 
-            data_input_test = DataInput()
-            data_input_test = data_input_test.input_data_into_pipeline(FLAGS.test_dataset, FLAGS.batch_size, FLAGS.image_width, FLAGS.image_height,
+            data_input_test = DataInput(FLAGS.test_dataset, FLAGS.batch_size, FLAGS.image_width, FLAGS.image_height,
                                         FLAGS.num_channels, SEED, Pad, FLAGS.datasetName)
 
             images_placeholder = tf.placeholder(tf.float32,
@@ -252,7 +250,6 @@ if __name__ == '__main__':
     parser.add_argument('--train_dataset', type=str, default="cifar10_input/cifar10-train.txt")
     parser.add_argument('--test_dataset', type=str, default="cifar10_input/cifar10-test.txt")
     parser.add_argument('--num_classes', type=int, default=10)
-    parser.add_argument('--num_examples_per_epoch_for_train', type=int, default=50000)
     parser.add_argument('--num_training_examples', type=int, default=50000)
     parser.add_argument('--num_testing_examples',type=int,default=10000)
     parser.add_argument('--datasetName', type=str, help='name of the dataset', default='cifar10')
