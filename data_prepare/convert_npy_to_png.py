@@ -21,14 +21,14 @@ def deal_npy_file(whitenFile_label, whitenFile_feature, txtfile, mode):
     x = x.reshape((x.shape[0], 3, 32, 32)).transpose(0, 2, 3, 1)
     print(x.shape)
 
-    output_dir = "./cifar10_images_from_npy/" + mode + "_plt"
+    output_dir = "./cifar10_images_from_npy/" + mode + "_misc"
     serial.mkdir(output_dir)
     file_names = []
-    for i in range(x.shape[0]):
-    #for i in range(1):
-        name = output_dir + "/" + mode + str(i) + "_plt.png"
-        plt.imsave(name, x[i])
-        # misc.imsave(name, x[i])
+    # for i in range(x.shape[0]):
+    for i in range(1):
+        name = output_dir + "/" + mode + str(i) + "_misc.png"
+        # plt.imsave(name, x[i])
+        misc.imsave(name, x[i])
         file_names.append(str(y[i][0]) + "," + name + "\n")
 
     open(txtfile, "w").writelines(file_names)
@@ -42,7 +42,7 @@ print(os.getcwd())
 whitenFile_label = "./cifar10/pylearn2_gcn_whitened/train_labels.npy"
 whitenFile_feature = "./cifar10/pylearn2_gcn_whitened/train.npy"
 # ouput file
-txtfile = "./cifar10_input/cifar10-train-plt.txt"
+txtfile = "./cifar10_input/cifar10-train-misc.txt"
 mode = "train"
 deal_npy_file(whitenFile_label, whitenFile_feature, txtfile, mode)
 
@@ -50,7 +50,7 @@ deal_npy_file(whitenFile_label, whitenFile_feature, txtfile, mode)
 whitenFile_label = "./cifar10/pylearn2_gcn_whitened/test_labels.npy"
 whitenFile_feature = "./cifar10/pylearn2_gcn_whitened/test.npy"
 # ouput file
-txtfile = "./cifar10_input/cifar10-test-plt.txt"
+txtfile = "./cifar10_input/cifar10-test-misc.txt"
 mode = "test"
 deal_npy_file(whitenFile_label, whitenFile_feature, txtfile, mode)
 
