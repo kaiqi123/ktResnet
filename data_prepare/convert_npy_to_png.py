@@ -1,6 +1,6 @@
 import numpy as np
 import os
-import matplotlib.pyplot as plt
+# import matplotlib.pyplot as plt
 from pylearn2.utils import serial
 from scipy import misc
 import cv2
