@@ -122,7 +122,7 @@ class Model(object):
 
     def loss(self, labels):
         cross_entropy = tf.nn.sparse_softmax_cross_entropy_with_logits(labels=labels, logits=self.fc, name='crossEntropy')
-        return tf.reduce_mean(cross_entropy, name='entropyMean')
+        return tf.reduce_mean(cross_entropy, name='EntropyMean')
 
     def training(self, loss, learning_rate, global_step):
         tf.summary.scalar('loss', loss)

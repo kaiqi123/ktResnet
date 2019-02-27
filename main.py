@@ -9,15 +9,16 @@ from tensorflow.python.client import device_lib
 
 tf.reset_default_graph()
 NUM_ITERATIONS = 10
-TeacherModel_K = 10
-Depth = 28
+Widen_Factor = 10
+Depth = 40
 TeacherModel_N = (Depth - 4) / 6
 SEED = 1234
 Num_Epoch_Per_Decay = 0.01
 learningRateDecayRatio = 0.2
-test_accuracy_list = []
 Pad = 4
-
+Test_accuracy_List = []
+Train_accuracy_List = []
+DecayedLearningRate_List = []
 
 class Resnet(object):
 
@@ -59,7 +60,7 @@ class Resnet(object):
 
         return tf.reduce_sum(tf.cast(correct, tf.int32))
 
-    def do_eval(self, sess, eval_correct, logits, images_placeholder, labels_placeholder, dataset,mode, phase_train):
+    def do_eval(self, sess, eval_correct, logits, images_placeholder, labels_placeholder, dataset, mode, phase_train):
 
             if mode == 'Test':
                 steps_per_epoch = FLAGS.num_testing_examples //FLAGS.batch_size
@@ -73,11 +74,7 @@ class Resnet(object):
 
             true_count = 0
             for step in xrange(steps_per_epoch):
-                if FLAGS.datasetName == 'mnist':
-                    feed_dict = {images_placeholder: np.reshape(dataset.test.next_batch(FLAGS.batch_size)[0], [FLAGS.batch_size, FLAGS.image_width, FLAGS.image_height, FLAGS.num_channels]), labels_placeholder: dataset.test.next_batch(FLAGS.batch_size)[1]}
-                else:
-                    feed_dict, images_feed, labels_feed = self.fill_feed_dict(dataset, images_placeholder,
-                                                            labels_placeholder,sess, mode,phase_train)
+                feed_dict, images_feed, labels_feed = self.fill_feed_dict(dataset, images_placeholder, labels_placeholder, sess, mode,phase_train)
                 count = sess.run(eval_correct, feed_dict=feed_dict)
                 true_count = true_count + count
 
@@ -85,22 +82,21 @@ class Resnet(object):
             print ('  Num examples: %d, Num correct: %d, Precision @ 1: %0.04f' %
                             (num_examples, true_count, precision))
 
-            if mode == 'Test':
-                test_accuracy_list.append(precision)
+            return precision
 
-    def define_teacher(self, images_placeholder, labels_placeholder, global_step, sess):
+    def define_teacher(self, images_placeholder, labels_placeholder, global_step, sess, SEED):
 
         print("Define Teacher")
         mentor = Model(FLAGS.num_channels, SEED)
-        mentor_data_dict = mentor.build_teacher_model(images_placeholder, FLAGS.num_classes, TeacherModel_K, TeacherModel_N)
+        mentor_data_dict = mentor.build_teacher_model(images_placeholder, FLAGS.num_classes, Widen_Factor, TeacherModel_N)
         #mentor_data_dict = mentor.build_vgg_conv1fc1(images_placeholder, FLAGS.num_classes)
         self.loss = mentor.loss(labels_placeholder)
 
         steps_per_epoch = FLAGS.num_examples_per_epoch_for_train / FLAGS.batch_size
-        print(steps_per_epoch)
         decay_steps = int(steps_per_epoch * Num_Epoch_Per_Decay)
-        print("Decay_steps: " + str(decay_steps))
         lr = tf.train.exponential_decay(FLAGS.learning_rate, global_step, decay_steps, learningRateDecayRatio, staircase=True)
+        print("Steps_per_epoch: "+str(steps_per_epoch))
+        print("Decay_steps: " + str(decay_steps))
 
         self.train_op = mentor.training(self.loss, lr, global_step)
         self.softmax = mentor_data_dict.softmax
@@ -110,12 +106,12 @@ class Resnet(object):
         self.saver = tf.train.Saver()
         return lr
 
-    def define_independent_student(self, images_placeholder, labels_placeholder, global_step, sess):
+    def define_independent_student(self, images_placeholder, labels_placeholder, global_step, sess, SEED):
 
         print("Define Independent student")
         student = Model(FLAGS.num_channels, SEED)
         if FLAGS.num_optimizers == 3:
-            mentee_data_dict = student.build_resnet_conv1Block1Fc1(images_placeholder, FLAGS.num_classes,  TeacherModel_K)
+            mentee_data_dict = student.build_resnet_conv1Block1Fc1(images_placeholder, FLAGS.num_classes,  Widen_Factor)
         if FLAGS.num_optimizers == 1:
             mentee_data_dict = student.build_conv1fc1(images_placeholder, FLAGS.num_classes)
 
@@ -149,36 +145,39 @@ class Resnet(object):
 
                 if FLAGS.teacher or FLAGS.student:
                     # print("train function: independent student or teacher")
-                    _, loss_value, decayedLearningRate = sess.run([self.train_op, self.loss, lr], feed_dict=feed_dict)
-                    print ('Decayed learning rate: '+str(decayedLearningRate))
+                    _, loss_value = sess.run([self.train_op, self.loss], feed_dict=feed_dict)
+
                     if i % 10 == 0:
                         print ('Step %d: loss_value = %.20f' % (i, loss_value))
-                """
+
                 if (i) % (FLAGS.num_examples_per_epoch_for_train // FLAGS.batch_size) == 0 or (i) == NUM_ITERATIONS - 1:
+
+                    decayedLearningRate = sess.run(lr)
+                    DecayedLearningRate_List.append(decayedLearningRate)
+                    print ('Decayed learning rate list: ' + str(DecayedLearningRate_List))
+
+                    print ("Training Data Eval:")
+                    train_acc = self.do_eval(sess, eval_correct, self.softmax, images_placeholder, labels_placeholder, data_input_train,'Train', phase_train)
+                    Train_accuracy_List.append(train_acc)
+                    print ("max test accuracy % f", max(Train_accuracy_List))
+
+                    print ("Test  Data Eval:")
+                    test_acc = self.do_eval(sess, eval_correct, self.softmax, images_placeholder, labels_placeholder, data_input_test, 'Test', phase_train)
+                    Test_accuracy_List.append(test_acc)
+                    print ("max test accuracy % f", max(Test_accuracy_List))
 
                     if FLAGS.teacher:
                         print("save teacher to: " + str(FLAGS.teacher_weights_filename))
                         self.saver.save(sess, FLAGS.teacher_weights_filename)
 
-                    print ("Training Data Eval:")
-                    self.do_eval(sess,
-                                 eval_correct,
-                                 self.softmax,
-                                 images_placeholder,
-                                 labels_placeholder,
-                                 data_input_train,
-                                 'Train', phase_train)
+                        f = open("output/teacher_train_"+str(FLAGS.learning_rate), "w")
+                        f.writelines(Train_accuracy_List)
 
-                    print ("Test  Data Eval:")
-                    self.do_eval(sess,
-                                 eval_correct,
-                                 self.softmax,
-                                 images_placeholder,
-                                 labels_placeholder,
-                                 data_input_test,
-                                 'Test', phase_train)
-                    print ("max test accuracy % f", max(test_accuracy_list))
-                    """
+                        f1 = open("output/teacher_test_"+str(FLAGS.learning_rate), "w")
+                        f1.writelines(Test_accuracy_List)
+
+                        f2 = open("output/teacher_decayedLearningRate", "w")
+                        f2.writelines(DecayedLearningRate_List)
 
         except Exception as e:
             print(e)
@@ -220,17 +219,19 @@ class Resnet(object):
             print("NUM_ITERATIONS: " + str(NUM_ITERATIONS))
             print("learning_rate: " + str(FLAGS.learning_rate))
             print("batch_size: " + str(FLAGS.batch_size))
+            print("Depth: " + str(Depth))
             print("TeacherModel_N: " + str(TeacherModel_N))
+            print("Widen_Factor: " + str(Widen_Factor))
 
             if FLAGS.teacher:
-                lr = self.define_teacher(images_placeholder, labels_placeholder, global_step, sess)
+                lr = self.define_teacher(images_placeholder, labels_placeholder, global_step, sess, SEED)
 
             elif FLAGS.student:
-                self.define_independent_student(images_placeholder, labels_placeholder, global_step, sess)
+                self.define_independent_student(images_placeholder, labels_placeholder, global_step, sess, SEED)
 
             self.train_model(lr, data_input_train, data_input_test, images_placeholder, labels_placeholder, sess, phase_train)
 
-            print(test_accuracy_list)
+            print(Test_accuracy_List)
             writer_tensorboard = tf.summary.FileWriter('tensorboard/', sess.graph)
 
             coord.request_stop()
