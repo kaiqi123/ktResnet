@@ -8,7 +8,7 @@ import argparse
 from tensorflow.python.client import device_lib
 
 tf.reset_default_graph()
-NUM_ITERATIONS = 78200
+NUM_ITERATIONS = 2
 TeacherModel_K = 10
 Depth = 28
 TeacherModel_N = (Depth - 4) / 6
