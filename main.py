@@ -155,7 +155,7 @@ class Resnet(object):
                     DecayedLearningRate_List.append(decayedLearningRate)
                     print ('Decayed learning rate list: ' + str(DecayedLearningRate_List))
 
-                    f2 = open("output/teacher_decayedLearningRate", "wb")
+                    f2 = open("output/teacher_decayedLearningRate", "w")
                     f2.writelines(DecayedLearningRate_List)
 
                 """
