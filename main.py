@@ -8,7 +8,7 @@ import argparse
 from tensorflow.python.client import device_lib
 
 tf.reset_default_graph()
-NUM_ITERATIONS = 1
+NUM_ITERATIONS = 2
 Widen_Factor = 4
 Depth = 40
 TeacherModel_N = (Depth - 4) / 6
@@ -151,6 +151,10 @@ class Resnet(object):
                         print ('Step %d: loss_value = %.20f' % (i, loss_value))
 
                 if FLAGS.teacher:
+                    decayedLearningRate = sess.run(lr)
+                    DecayedLearningRate_List.append(decayedLearningRate)
+                    print ('Decayed learning rate list: ' + str(DecayedLearningRate_List))
+
                     f2 = open("output/teacher_decayedLearningRate", "wb")
                     f2.writelines(DecayedLearningRate_List)
 
