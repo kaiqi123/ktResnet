@@ -149,8 +149,8 @@ class Resnet(object):
 
                 if FLAGS.teacher or FLAGS.student:
                     # print("train function: independent student or teacher")
-                    _, loss_value, lr = sess.run([self.train_op, self.loss, lr], feed_dict=feed_dict)
-                    print ('Decayed learning rate: '+str(lr))
+                    _, loss_value, decayedLearningRate = sess.run([self.train_op, self.loss, lr], feed_dict=feed_dict)
+                    print ('Decayed learning rate: '+str(decayedLearningRate))
                     if i % 10 == 0:
                         print ('Step %d: loss_value = %.20f' % (i, loss_value))
                 """
