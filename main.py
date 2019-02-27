@@ -8,11 +8,11 @@ import argparse
 from tensorflow.python.client import device_lib
 
 tf.reset_default_graph()
-NUM_ITERATIONS = 10
-Widen_Factor = 10
+NUM_ITERATIONS = 1
+Widen_Factor = 4
 Depth = 40
 TeacherModel_N = (Depth - 4) / 6
-SEED = 1234
+SEED = 444
 Num_Epoch_Per_Decay = 0.01
 learningRateDecayRatio = 0.2
 Pad = 4
@@ -150,6 +150,11 @@ class Resnet(object):
                     if i % 10 == 0:
                         print ('Step %d: loss_value = %.20f' % (i, loss_value))
 
+                if FLAGS.teacher:
+                    f2 = open("output/teacher_decayedLearningRate", "wb")
+                    f2.writelines(DecayedLearningRate_List)
+
+                """
                 if (i) % (FLAGS.num_examples_per_epoch_for_train // FLAGS.batch_size) == 0 or (i) == NUM_ITERATIONS - 1:
 
                     decayedLearningRate = sess.run(lr)
@@ -165,19 +170,20 @@ class Resnet(object):
                     test_acc = self.do_eval(sess, eval_correct, self.softmax, images_placeholder, labels_placeholder, data_input_test, 'Test', phase_train)
                     Test_accuracy_List.append(test_acc)
                     print ("max test accuracy % f", max(Test_accuracy_List))
-
+                    
                     if FLAGS.teacher:
                         print("save teacher to: " + str(FLAGS.teacher_weights_filename))
                         self.saver.save(sess, FLAGS.teacher_weights_filename)
-
-                        f = open("output/teacher_train_"+str(FLAGS.learning_rate), "w")
+    
+                        f = open("output/teacher_train_" + str(FLAGS.learning_rate), "w")
                         f.writelines(Train_accuracy_List)
-
-                        f1 = open("output/teacher_test_"+str(FLAGS.learning_rate), "w")
+    
+                        f1 = open("output/teacher_test_" + str(FLAGS.learning_rate), "w")
                         f1.writelines(Test_accuracy_List)
-
+    
                         f2 = open("output/teacher_decayedLearningRate", "w")
                         f2.writelines(DecayedLearningRate_List)
+                """
 
         except Exception as e:
             print(e)
