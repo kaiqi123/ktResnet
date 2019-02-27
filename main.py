@@ -96,9 +96,10 @@ class Resnet(object):
         #mentor_data_dict = mentor.build_vgg_conv1fc1(images_placeholder, FLAGS.num_classes)
         self.loss = mentor.loss(labels_placeholder)
 
-        # learning rate decay
         steps_per_epoch = FLAGS.num_examples_per_epoch_for_train / FLAGS.batch_size
+        print(steps_per_epoch)
         decay_steps = int(steps_per_epoch * Num_Epoch_Per_Decay)
+        print(decay_steps)
         lr = tf.train.exponential_decay(FLAGS.learning_rate, global_step, decay_steps, learningRateDecayRatio, staircase=True)
 
         self.train_op = mentor.training(self.loss, lr, global_step)
@@ -107,6 +108,7 @@ class Resnet(object):
         init = tf.global_variables_initializer()
         sess.run(init)
         self.saver = tf.train.Saver()
+        return lr
 
     def define_independent_student(self, images_placeholder, labels_placeholder, global_step, sess):
 
@@ -130,7 +132,7 @@ class Resnet(object):
         sess.run(init)
         self.saver = tf.train.Saver()
 
-    def train_model(self, data_input_train, data_input_test, images_placeholder, labels_placeholder, sess, phase_train):
+    def train_model(self, lr, data_input_train, data_input_test, images_placeholder, labels_placeholder, sess, phase_train):
 
         try:
             print('Begin to train model...')
@@ -147,10 +149,11 @@ class Resnet(object):
 
                 if FLAGS.teacher or FLAGS.student:
                     # print("train function: independent student or teacher")
-                    _, loss_value = sess.run([self.train_op, self.loss], feed_dict=feed_dict)
+                    _, loss_value, lr = sess.run([self.train_op, self.loss, lr], feed_dict=feed_dict)
+                    print ('Decayed learning rate: '+str(lr))
                     if i % 10 == 0:
                         print ('Step %d: loss_value = %.20f' % (i, loss_value))
-
+                """
                 if (i) % (FLAGS.num_examples_per_epoch_for_train // FLAGS.batch_size) == 0 or (i) == NUM_ITERATIONS - 1:
 
                     if FLAGS.teacher:
@@ -175,6 +178,7 @@ class Resnet(object):
                                  data_input_test,
                                  'Test', phase_train)
                     print ("max test accuracy % f", max(test_accuracy_list))
+                    """
 
         except Exception as e:
             print(e)
@@ -219,12 +223,12 @@ class Resnet(object):
             print("TeacherModel_N: " + str(TeacherModel_N))
 
             if FLAGS.teacher:
-                self.define_teacher(images_placeholder, labels_placeholder, global_step, sess)
+                lr = self.define_teacher(images_placeholder, labels_placeholder, global_step, sess)
 
             elif FLAGS.student:
                 self.define_independent_student(images_placeholder, labels_placeholder, global_step, sess)
 
-            self.train_model(data_input_train, data_input_test, images_placeholder, labels_placeholder, sess, phase_train)
+            self.train_model(lr, data_input_train, data_input_test, images_placeholder, labels_placeholder, sess, phase_train)
 
             print(test_accuracy_list)
             writer_tensorboard = tf.summary.FileWriter('tensorboard/', sess.graph)
