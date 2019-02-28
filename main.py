@@ -156,7 +156,7 @@ class Resnet(object):
                     print ('Decayed learning rate list: ' + str(DecayedLearningRate_List))
 
                     f2 = open("output/teacher_decayedLearningRate", "w")
-                    f2.writelines(DecayedLearningRate_List)
+                    f2.writelines([str(e) + "," for e in DecayedLearningRate_List])
 
                 """
                 if (i) % (FLAGS.num_examples_per_epoch_for_train // FLAGS.batch_size) == 0 or (i) == NUM_ITERATIONS - 1:
