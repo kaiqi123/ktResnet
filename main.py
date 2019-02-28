@@ -8,7 +8,7 @@ import argparse
 from tensorflow.python.client import device_lib
 
 tf.reset_default_graph()
-NUM_ITERATIONS = 2
+NUM_ITERATIONS = 10
 Widen_Factor = 4
 Depth = 40
 TeacherModel_N = (Depth - 4) / 6
@@ -150,15 +150,6 @@ class Resnet(object):
                     if i % 10 == 0:
                         print ('Step %d: loss_value = %.20f' % (i, loss_value))
 
-                if FLAGS.teacher:
-                    decayedLearningRate = sess.run(lr)
-                    DecayedLearningRate_List.append(decayedLearningRate)
-                    print ('Decayed learning rate list: ' + str(DecayedLearningRate_List))
-
-                    f2 = open("output/teacher_decayedLearningRate", "w")
-                    f2.writelines([str(e) + "," for e in DecayedLearningRate_List])
-
-                """
                 if (i) % (FLAGS.num_examples_per_epoch_for_train // FLAGS.batch_size) == 0 or (i) == NUM_ITERATIONS - 1:
 
                     decayedLearningRate = sess.run(lr)
@@ -180,14 +171,13 @@ class Resnet(object):
                         self.saver.save(sess, FLAGS.teacher_weights_filename)
     
                         f = open("output/teacher_train_" + str(FLAGS.learning_rate), "w")
-                        f.writelines(Train_accuracy_List)
+                        f.writelines([str(e) + "," for e in Train_accuracy_List])
     
                         f1 = open("output/teacher_test_" + str(FLAGS.learning_rate), "w")
-                        f1.writelines(Test_accuracy_List)
+                        f1.writelines([str(e) + "," for e in Test_accuracy_List])
     
                         f2 = open("output/teacher_decayedLearningRate", "w")
-                        f2.writelines(DecayedLearningRate_List)
-                """
+                        f2.writelines([str(e) + "," for e in DecayedLearningRate_List])
 
         except Exception as e:
             print(e)
