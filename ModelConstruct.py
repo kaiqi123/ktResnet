@@ -50,8 +50,8 @@ class Model(object):
 
             batchNorm = BatchNormalization(axis=-1, name='BatchNormal')(out)
             relu = tf.nn.relu(batchNorm, name='relu')
-            dropout = tf.nn.dropout(relu, 0.3, seed=self.seed)
-            out = self.Convolution(dropout, nOutputPlane, nOutputPlane, 1)
+            # dropout = tf.nn.dropout(relu, 0.3, seed=self.seed)
+            out = self.Convolution(relu, nOutputPlane, nOutputPlane, 1)
             print(out)
         return out
 
