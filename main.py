@@ -9,8 +9,8 @@ from tensorflow.python.client import device_lib
 
 tf.reset_default_graph()
 NUM_ITERATIONS = 78000
-Widen_Factor = 4
-Depth = 40
+Widen_Factor = 10
+Depth = 28
 TeacherModel_N = (Depth - 4) / 6
 SEED = 444
 Num_Epoch_Per_Decay = 60
@@ -196,10 +196,10 @@ class Resnet(object):
             tf.set_random_seed(SEED)
 
             data_input_train = DataInput(FLAGS.train_dataset, FLAGS.batch_size, FLAGS.image_width, FLAGS.image_height,
-                      FLAGS.num_channels, SEED, Pad, FLAGS.datasetName)
+                      FLAGS.num_channels, SEED, Pad, FLAGS.datasetName, True)
 
             data_input_test = DataInput(FLAGS.test_dataset, FLAGS.batch_size, FLAGS.image_width, FLAGS.image_height,
-                                        FLAGS.num_channels, SEED, Pad, FLAGS.datasetName)
+                                        FLAGS.num_channels, SEED, Pad, FLAGS.datasetName, False)
 
             images_placeholder = tf.placeholder(tf.float32,
                                                 shape=(FLAGS.batch_size, FLAGS.image_height,

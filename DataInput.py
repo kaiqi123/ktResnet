@@ -3,7 +3,7 @@ import tensorflow as tf
 
 class DataInput(object):
 
-    def __init__(self, dataset_file, batch_size, image_width, image_height, num_channels, seed, pad, datasetName):
+    def __init__(self, dataset_file, batch_size, image_width, image_height, num_channels, seed, pad, datasetName, whetherTrain):
 
         self.dataset_file = dataset_file
         self.batch_size = batch_size
@@ -15,6 +15,7 @@ class DataInput(object):
         self.datasetName = datasetName
         self.example_batch = None
         self.label_batch = None
+        self.whetherTrain = whetherTrain
 
         self.input_data_into_pipeline()
 
@@ -28,10 +29,12 @@ class DataInput(object):
 
         file_content = tf.read_file(col2)
         train_image = tf.image.decode_png(file_content, channels=self.num_channels)
+        if self.whetherTrain:
+            print("whetherTrain is ture, do pad, flip and crop")
+            train_image = tf.image.resize_image_with_pad(train_image, self.image_width + self.pad, self.image_width + self.pad)
+            train_image = tf.image.random_flip_left_right(train_image)
+            train_image = tf.random_crop(train_image, [self.image_height, self.image_width, 3], seed=self.seed, name="crop")
         train_image = tf.image.per_image_standardization(train_image)
-        train_image = tf.image.resize_image_with_pad(train_image, self.image_width + self.pad, self.image_width + self.pad)
-        train_image = tf.image.random_flip_left_right(train_image)
-        train_image = tf.random_crop(train_image, [self.image_height, self.image_width, 3], seed=self.seed, name="crop")
 
         min_after_dequeue = 10000
         capacity = min_after_dequeue + 3 * self.batch_size
