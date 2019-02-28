@@ -29,16 +29,16 @@ class DataInput(object):
 
         file_content = tf.read_file(col2)
         train_image = tf.image.decode_png(file_content, channels=self.num_channels)
-        if self.whetherTrain:
-            print("Train dataset, do pad, flip and crop")
-            train_image = tf.image.resize_image_with_pad(train_image, self.image_width + self.pad, self.image_width + self.pad)
-            train_image = tf.image.random_flip_left_right(train_image)
-            train_image = tf.random_crop(train_image, [self.image_height, self.image_width, 3], seed=self.seed, name="crop")
-            train_image = tf.image.per_image_standardization(train_image)
-        else:
-            print("Test dataset, do standardization only")
-            train_image = tf.image.per_image_standardization(train_image)
-            train_image = tf.image.resize_images(train_image, [self.image_width, self.image_height])
+        # if self.whetherTrain:
+        #    print("Train dataset, do pad, flip and crop")
+        train_image = tf.image.resize_image_with_pad(train_image, self.image_width + self.pad, self.image_width + self.pad)
+        train_image = tf.image.random_flip_left_right(train_image)
+        train_image = tf.random_crop(train_image, [self.image_height, self.image_width, 3], seed=self.seed, name="crop")
+        train_image = tf.image.per_image_standardization(train_image)
+        # else:
+        #    print("Test dataset, do standardization only")
+        #    train_image = tf.image.per_image_standardization(train_image)
+        #    train_image = tf.image.resize_images(train_image, [self.image_width, self.image_height])
 
         min_after_dequeue = 10000
         capacity = min_after_dequeue + 3 * self.batch_size
