@@ -93,10 +93,6 @@ class Model(object):
         group2 = self.group(group1, nStages[1], nStages[2], n, 2)
         group3 = self.group(group2, nStages[2], nStages[3], n, 2)
 
-        #group1 = self.basic_block(conv1, nStages[0],  nStages[1], 1)
-        #group2 = self.basic_block(group1, nStages[1], nStages[2], 2)
-        #group3 = self.basic_block(group2, nStages[2], nStages[3], 2)
-
         batchNorm = BatchNormalization(axis=-1, name='BatchNormal')(group3)
         relu = tf.nn.relu(batchNorm, name='relu')
         averagePool = tf.nn.avg_pool(relu, ksize=[1, 8, 8, 1], strides=[1, 1, 1, 1], padding='VALID', name='averagePool')
@@ -111,9 +107,8 @@ class Model(object):
 
         print("build_conv1fc1")
         K.set_learning_phase(True)
-        conv = self.Convolution(rgb, self.num_channels, 16, 1)
+        conv = self.Convolution(rgb, self.num_channels, 16, stride=1, padding=1)
         relu = tf.nn.relu(conv, name='relu')
-        #batchNorm = BatchNormalization(axis=-1, name='BatchNormal')(relu)
         self.fc = self.FullyConnect(relu, num_classes)
         self.softmax = tf.nn.softmax(self.fc)
         return self
@@ -122,7 +117,7 @@ class Model(object):
         print("build_resnet_conv1Block1Fc1")
         K.set_learning_phase(True)
         nStages = [16, 16 * k, 32 * k, 64 * k]
-        conv1 = self.Convolution(rgb, self.num_channels, nStages[0], 1)
+        conv1 = self.Convolution(rgb, self.num_channels, nStages[0], stride=1, padding=1)
         print(conv1)
         block = self.basic_block(conv1,  nStages[0],  nStages[1], 2)
         batchNorm = BatchNormalization(axis=-1, name='BatchNormal')(block)
