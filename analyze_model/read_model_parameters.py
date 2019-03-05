@@ -11,11 +11,13 @@ def print_tensor_dict(params):
     for i, (key, v) in enumerate(sorted(params.items())):
         print(str(i).ljust(5), key.ljust(kmax + 3), str(tuple(v.shape)).ljust(23), torch.typename(v), v.requires_grad)
 
-params = torch.load('model.pt7')
 
-print(type(params))
-print(type(params.items()))
-print_tensor_dict(params)
+checkpoint = torch.load('model.pt7')
+
+print(type(checkpoint))
+print(checkpoint.keys())
+#print(type(params.items()))
+#print_tensor_dict(params)
 
 
 """
