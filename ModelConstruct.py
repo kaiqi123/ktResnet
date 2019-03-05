@@ -21,22 +21,22 @@ class Model(object):
     def Convolution(self, imgInput, nInputPlane, nOutputPlane, stride, padding):
         with tf.name_scope('Convolution') as scope:
             imgInput = tf.pad(imgInput, [[0, 0], [padding, padding], [padding, padding], [0, 0]])
-            kernel = tf.Variable(tf.truncated_normal([3, 3, nInputPlane, nOutputPlane], dtype=tf.float32, stddev=1e-2, seed=self.seed), trainable=self.trainable, name='kernel')
+            kernel = tf.Variable(tf.truncated_normal([3, 3, nInputPlane, nOutputPlane], dtype=tf.float32, stddev=1e-2, seed=self.seed), trainable=self.trainable, name='conv_kernel')
             conv = tf.nn.conv2d(imgInput, filter=kernel, strides=[1, stride, stride, 1], padding='VALID', name="conv")
             biases = tf.Variable(tf.constant(0.0, shape=[nOutputPlane], dtype=tf.float32), trainable=self.trainable, name='biase')
             imgOutput = tf.nn.bias_add(conv, biases, name=scope)
-            print(conv)
+            print(kernel)
             print(biases)
         return imgOutput
 
     def Convolution_dim(self, imgInput, nInputPlane, nOutputPlane, stride, padding):
         with tf.name_scope('Convolution_dim') as scope:
             imgInput = tf.pad(imgInput, [[0, 0], [padding, padding], [padding, padding], [0, 0]])
-            kernel = tf.Variable(tf.truncated_normal([1, 1, nInputPlane, nOutputPlane], dtype=tf.float32, stddev=1e-2, seed=self.seed), trainable=self.trainable, name='kernel')
+            kernel = tf.Variable(tf.truncated_normal([1, 1, nInputPlane, nOutputPlane], dtype=tf.float32, stddev=1e-2, seed=self.seed), trainable=self.trainable, name='conv_kernel')
             conv = tf.nn.conv2d(imgInput, filter=kernel, strides=[1, stride, stride, 1], padding='VALID', name="conv_dim")
             biases = tf.Variable(tf.constant(0.0, shape=[nOutputPlane], dtype=tf.float32), trainable=self.trainable, name='biases_dim')
             imgOutput = tf.nn.bias_add(conv, biases, name=scope)
-            print(conv)
+            print(kernel)
             print(biases)
         return imgOutput
 
@@ -47,6 +47,8 @@ class Model(object):
             fcb = tf.Variable(tf.constant(0.0, shape=[nOutputPlane], dtype=tf.float32), trainable=self.trainable, name='biases')
             flat = tf.reshape(imgInput, [-1, shape])
             imgOutput = tf.nn.bias_add(tf.matmul(flat, fcw), fcb)
+            print(fcw)
+            print(fcb)
         return imgOutput
 
     def basic_block(self, imgInput, nInputPlane, nOutputPlane, stride):
