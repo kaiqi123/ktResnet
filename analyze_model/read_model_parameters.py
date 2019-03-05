@@ -17,6 +17,7 @@ print(type(params))
 print(type(params.items()))
 print_tensor_dict(params)
 
+
 """
 # params = model_zoo.load_url('https://s3.amazonaws.com/modelzoo-networks/wide-resnet-50-2-export-5ae25d50.pth')
 
