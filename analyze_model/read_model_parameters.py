@@ -10,14 +10,15 @@ from torch.autograd import Variable
 
 params = torch.load('model.pt7')
 
-print(params.items())
+print(type(params))
+print(type(params.items()))
+print(params.items()[0])
 
-"""
 # convert numpy arrays to torch Variables
 for k, v in sorted(params.items()):
     print(k, tuple(v.shape))
     params[k] = Variable(v, requires_grad=True)
 
-print('\nTotal parameters:', sum(v.numel() for v in params.values()))
-"""
+# print('\nTotal parameters:', sum(v.numel() for v in params.values()))
+
 
