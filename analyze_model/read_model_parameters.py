@@ -4,7 +4,7 @@ import torch
 from torch.autograd import Variable
 # from torchviz import make_dot
 # from torch.utils import model_zoo
-
+import numpy as np
 def print_tensor_dict(params):
     kmax = max(len(key) for key in params.keys())
     #for i, (key, v) in enumerate(params.items()):
@@ -17,6 +17,9 @@ checkpoint = torch.load('model.pt7')
 print(checkpoint.keys())
 
 params = checkpoint['params']
+
+np.save(params, 'model_w10d28')
+params = np.load('model_w10d28')
 
 for k, v in sorted(params.items()):
     print(k, tuple(v.shape))
