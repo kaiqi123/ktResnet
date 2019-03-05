@@ -110,7 +110,6 @@ class Model(object):
         return self
 
     def build_conv1fc1(self, rgb, num_classes):
-
         print("build_conv1fc1")
         K.set_learning_phase(True)
         conv = self.Convolution(rgb, self.num_channels, 16, stride=1, padding=1)
