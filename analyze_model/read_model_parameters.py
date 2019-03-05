@@ -10,7 +10,7 @@ from torch.autograd import Variable
 
 params = torch.load('model.pt7')
 
-print(params)
+print(params.items())
 
 """
 # convert numpy arrays to torch Variables
@@ -20,3 +20,4 @@ for k, v in sorted(params.items()):
 
 print('\nTotal parameters:', sum(v.numel() for v in params.values()))
 """
+
