@@ -5,6 +5,7 @@ from torch.autograd import Variable
 from torchviz import make_dot
 from torch.utils import model_zoo
 
+
 # params = model_zoo.load_url('model.pt7')
 
 params = torch.load('model.pt7')
