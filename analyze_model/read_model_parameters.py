@@ -16,10 +16,11 @@ checkpoint = torch.load('model.pt7')
 
 print(checkpoint.keys())
 
-params = checkpoint['params']
+params_pytorch = checkpoint['params']
 
-np.save(params, 'model_w10d28')
-params = np.load('model_w10d28')
+np.save('model_w10d28.npy', params_pytorch)
+
+params = np.load('model_w10d28.npy')
 
 for k, v in sorted(params.items()):
     print(k, tuple(v.shape))
