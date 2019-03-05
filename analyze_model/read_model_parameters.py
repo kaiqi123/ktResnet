@@ -2,8 +2,8 @@ import re
 import torch
 import torch.nn.functional as F
 from torch.autograd import Variable
-from torchviz import make_dot
-from torch.utils import model_zoo
+#from torchviz import make_dot
+#from torch.utils import model_zoo
 
 
 # params = model_zoo.load_url('model.pt7')
