@@ -5,11 +5,6 @@ from torch.autograd import Variable
 # from torchviz import make_dot
 # from torch.utils import model_zoo
 import numpy as np
-def print_tensor_dict(params):
-    kmax = max(len(key) for key in params.keys())
-    #for i, (key, v) in enumerate(params.items()):
-    for i, (key, v) in enumerate(sorted(params.items())):
-        print(str(i).ljust(5), key.ljust(kmax + 3), str(tuple(v.shape)).ljust(23), torch.typename(v), v.requires_grad)
 
 
 checkpoint = torch.load('model.pt7')
@@ -21,6 +16,8 @@ params_pytorch = checkpoint['params']
 np.save('model_w10d28.npy', params_pytorch)
 
 params = np.load('model_w10d28.npy')
+
+params = dict(params)
 
 for k, v in sorted(params.items()):
     print(k, tuple(v.shape))
