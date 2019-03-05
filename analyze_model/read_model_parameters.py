@@ -14,10 +14,7 @@ def print_tensor_dict(params):
 
 checkpoint = torch.load('model.pt7')
 
-print(type(checkpoint))
 print(checkpoint.keys())
-print(type(checkpoint['params']))
-print(checkpoint['params'].keys())
 
 params = checkpoint['params']
 
