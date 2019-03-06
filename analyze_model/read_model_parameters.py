@@ -5,17 +5,24 @@ from torch.autograd import Variable
 # from torchviz import make_dot
 # from torch.utils import model_zoo
 import numpy as np
-
+import pickle
 
 checkpoint = torch.load('model.pt7')
 
 print(checkpoint.keys())
 
-params = checkpoint['params']
+params_pytorch = checkpoint['params']
 
 #np.save('model_w10d28.npy', params_pytorch)
 #params = np.load('model_w10d28.npy')
 #params = dict(params)
+
+with open('model_w10d28.pkl', 'wb') as f:
+    pickle.dump(params_pytorch, f, pickle.HIGHEST_PROTOCOL)
+
+with open('model_w10d28.pkl', 'rb') as f:
+    params = pickle.load(f)
+
 
 for k, v in sorted(params.items()):
     print(k, tuple(v.shape))
