@@ -48,6 +48,11 @@ class Model(object):
 
     def batch_norm(self, imgInput, bnN, phase_train):
         with tf.name_scope('bn') as scope:
+
+            batchNorm = BatchNormalization(axis=-1, name='BatchNorm', trainable=self.trainable)(imgInput)
+            print(batchNorm)
+
+            """
             #weight= tf.Variable(tf.random_uniform(shape=[bnN], minval=0.0, maxval=1.0, dtype=tf.float32, seed=self.seed), trainable=self.trainable, name='weight')
             #bias = tf.Variable(tf.constant(0.0, shape=[bnN], dtype=tf.float32), trainable=self.trainable, name='bias')
             #running_mean = tf.Variable(tf.constant(0.0, shape=[bnN], dtype=tf.float32), trainable=False, name='running_mean')
@@ -70,6 +75,7 @@ class Model(object):
             print(bias)
             print(running_mean)
             print(running_var)
+            """
         return batchNorm
 
     def basic_block(self, imgInput, nInputPlane, nOutputPlane, stride, phase_train):
@@ -128,12 +134,19 @@ class Model(object):
 
     def training(self, loss, learning_rate, global_step):
 
+        """
         update_ops = tf.get_collection(tf.GraphKeys.UPDATE_OPS)
         with tf.control_dependencies(update_ops):
             # Ensures that we execute the update_ops before performing the train_step
             tf.summary.scalar('loss', loss)
             optimizer = tf.contrib.opt.MomentumWOptimizer(weight_decay=0.0005, learning_rate=learning_rate, momentum=0.9, use_nesterov=True)
             train_op = optimizer.minimize(loss, global_step=global_step)
+        return train_op
+        """
+
+        tf.summary.scalar('loss', loss)
+        optimizer = tf.contrib.opt.MomentumWOptimizer(weight_decay=0.0005, learning_rate=learning_rate, momentum=0.9, use_nesterov=True)
+        train_op = optimizer.minimize(loss, global_step=global_step)
         return train_op
 
 
