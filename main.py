@@ -1,8 +1,7 @@
 import tensorflow as tf
 import numpy as np
 from DataInput import DataInput
-# from ModelConstruct import Model
-from ModelConstruct_without_bn import Model
+from ModelConstruct import Model
 import time
 import sys
 import argparse
