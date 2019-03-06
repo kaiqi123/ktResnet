@@ -51,9 +51,19 @@ class Model(object):
             bias = tf.Variable(tf.constant(0.0, shape=[bnN], dtype=tf.float32), trainable=self.trainable, name='bias')
             running_mean = tf.Variable(tf.constant(0.0, shape=[bnN], dtype=tf.float32), trainable=False, name='running_mean')
             running_var = tf.Variable(tf.constant(1.0, shape=[bnN], dtype=tf.float32), trainable=False, name='running_var')
-            batchNorm = BatchNormalization(axis=-1, beta_initializer=bias, gamma_initializer=weight,
-                                           moving_mean_initializer=running_mean, moving_variance_initializer=running_var,
-                                           center=True, scale=True, name='BatchNormal')(imgInput)
+            #batchNorm = BatchNormalization(axis=-1, beta_initializer=bias, gamma_initializer=weight,
+            #                               moving_mean_initializer=running_mean, moving_variance_initializer=running_var,
+            #                               center=True, scale=True, name='BatchNormal')(imgInput)
+            batchNorm = tf.nn.batch_normalization(
+                imgInput,
+                mean=running_mean,
+                variance=running_var,
+                offset=bias,
+                scale=weight,
+                variance_epsilon=0.001,
+                name='BatchNormal'
+            )
+
             print(weight)
             print(bias)
             print(running_mean)
