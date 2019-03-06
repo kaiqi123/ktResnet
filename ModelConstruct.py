@@ -47,15 +47,15 @@ class Model(object):
 
     def batch_norm(self, imgInput, bnN):
         with tf.name_scope('bn') as scope:
-            #weight= tf.Variable(tf.random_uniform(shape=[bnN], minval=0.0, maxval=1.0, dtype=tf.float32, seed=self.seed), trainable=self.trainable, name='weight')
-            #bias = tf.Variable(tf.constant(0.0, shape=[bnN], dtype=tf.float32), trainable=self.trainable, name='bias')
-            #running_mean = tf.Variable(tf.constant(0.0, shape=[bnN], dtype=tf.float32), trainable=False, name='running_mean')
-            #running_var = tf.Variable(tf.constant(1.0, shape=[bnN], dtype=tf.float32), trainable=False, name='running_var')
+            weight= tf.Variable(tf.random_uniform(shape=[bnN], minval=0.0, maxval=1.0, dtype=tf.float32, seed=self.seed), trainable=self.trainable, name='weight')
+            bias = tf.Variable(tf.constant(0.0, shape=[bnN], dtype=tf.float32), trainable=self.trainable, name='bias')
+            running_mean = tf.Variable(tf.constant(0.0, shape=[bnN], dtype=tf.float32), trainable=False, name='running_mean')
+            running_var = tf.Variable(tf.constant(1.0, shape=[bnN], dtype=tf.float32), trainable=False, name='running_var')
 
-            weight = tf.random_normal_initializer(1.0, 0.0)
-            bias = tf.constant_initializer(0.)
-            running_mean = tf.constant_initializer(0.)
-            running_var = tf.ones_initializer()
+            #weight = tf.random_normal_initializer(1.0, 0.0)
+            #bias = tf.constant_initializer(0.)
+            #running_mean = tf.constant_initializer(0.)
+            #running_var = tf.ones_initializer()
 
             params = {
                 'beta': bias,
