@@ -66,7 +66,7 @@ params = checkpoint['params']
 
 for k, v in sorted(params.items()):
     print(k, tuple(v.shape))
-    params[k] = Variable(v, requires_grad=True)
+    params[k] = Variable(v, requires_grad=False)
 print('\nTotal parameters:', sum(v.numel() for v in params.values()))
 
 inputs = torch.randn(1,3,224,224)
