@@ -47,12 +47,23 @@ class Model(object):
 
     def batch_norm(self, imgInput, bnN):
         with tf.name_scope('bn') as scope:
-            weight= tf.Variable(tf.random_uniform(shape=[bnN], minval=0.0, maxval=1.0, dtype=tf.float32, seed=self.seed), trainable=self.trainable, name='weight')
-            bias = tf.Variable(tf.constant(0.0, shape=[bnN], dtype=tf.float32), trainable=self.trainable, name='bias')
-            running_mean = tf.Variable(tf.constant(0.0, shape=[bnN], dtype=tf.float32), trainable=False, name='running_mean')
-            running_var = tf.Variable(tf.constant(1.0, shape=[bnN], dtype=tf.float32), trainable=False, name='running_var')
-            batchNorm = tf.nn.batch_normalization(imgInput, mean=running_mean, variance=running_var, offset=bias, scale=weight,
-                                                  variance_epsilon=0.00001,name='BatchNormal')
+            #weight= tf.Variable(tf.random_uniform(shape=[bnN], minval=0.0, maxval=1.0, dtype=tf.float32, seed=self.seed), trainable=self.trainable, name='weight')
+            #bias = tf.Variable(tf.constant(0.0, shape=[bnN], dtype=tf.float32), trainable=self.trainable, name='bias')
+            #running_mean = tf.Variable(tf.constant(0.0, shape=[bnN], dtype=tf.float32), trainable=False, name='running_mean')
+            #running_var = tf.Variable(tf.constant(1.0, shape=[bnN], dtype=tf.float32), trainable=False, name='running_var')
+
+            weight = tf.random_normal_initializer(1.0, 0.0)
+            bias = tf.constant_initializer(0.)
+            running_mean = tf.constant_initializer(0.)
+            running_var = tf.ones_initializer()
+
+            params = {
+                'beta': bias,
+                'gamma': weight,
+                'moving_mean': running_mean,
+                'moving_variance': running_var
+            }
+            batchNorm = tf.contrib.layers.batch_norm(imgInput, center=True, scale=True, param_initializers=params, is_training=self.trainable, name='BatchNormal')
 
             print(weight)
             print(bias)
@@ -115,11 +126,13 @@ class Model(object):
         return tf.reduce_mean(cross_entropy, name='EntropyMean')
 
     def training(self, loss, learning_rate, global_step):
-        tf.summary.scalar('loss', loss)
-        # optimizer = tf.train.MomentumOptimizer(learning_rate, momentum = 0.9, use_nesterov = True )
-        optimizer = tf.contrib.opt.MomentumWOptimizer(weight_decay=0.0005, learning_rate=learning_rate, momentum=0.9, use_nesterov=True)
-        # optimizer = tf.train.AdamOptimizer(learning_rate)
-        train_op = optimizer.minimize(loss, global_step=global_step)
+
+        update_ops = tf.get_collection(tf.GraphKeys.UPDATE_OPS)
+        with tf.control_dependencies(update_ops):
+            # Ensures that we execute the update_ops before performing the train_step
+            tf.summary.scalar('loss', loss)
+            optimizer = tf.contrib.opt.MomentumWOptimizer(weight_decay=0.0005, learning_rate=learning_rate, momentum=0.9, use_nesterov=True)
+            train_op = optimizer.minimize(loss, global_step=global_step)
         return train_op
 
 
