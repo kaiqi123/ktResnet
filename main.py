@@ -87,8 +87,8 @@ class Resnet(object):
     def define_teacher(self, images_placeholder, labels_placeholder, global_step, sess, SEED, phase_train):
 
         print("Define Teacher")
-        mentor = Model(FLAGS.num_channels, SEED, phase_train)
-        mentor_data_dict = mentor.build_teacher_model(images_placeholder, FLAGS.num_classes, Widen_Factor, TeacherModel_N)
+        mentor = Model(FLAGS.num_channels, SEED)
+        mentor_data_dict = mentor.build_teacher_model(images_placeholder, FLAGS.num_classes, Widen_Factor, TeacherModel_N, phase_train)
         #mentor_data_dict = mentor.build_vgg_conv1fc1(images_placeholder, FLAGS.num_classes)
         self.loss = mentor.loss(labels_placeholder)
 
