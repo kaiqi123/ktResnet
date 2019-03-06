@@ -63,7 +63,7 @@ class Model(object):
                 'moving_mean': running_mean,
                 'moving_variance': running_var
             }
-            batchNorm = tf.contrib.layers.batch_norm(imgInput, center=True, scale=True, param_initializers=params, is_training=self.trainable, name='BatchNormal')
+            batchNorm = tf.contrib.layers.batch_norm(imgInput, center=True, scale=True, param_initializers=params, is_training=self.trainable, scope=scope)
 
             print(weight)
             print(bias)
