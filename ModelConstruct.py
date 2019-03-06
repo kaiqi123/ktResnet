@@ -18,7 +18,7 @@ class Model(object):
         self.fc = None
         self.softmax = None
 
-    def Convolution_without_bias(self, imgInput, nInputPlane, nOutputPlane, stride, padding):
+    def conv2d(self, imgInput, nInputPlane, nOutputPlane, stride, padding):
         with tf.name_scope('Convolution') as scope:
             imgInput = tf.pad(imgInput, [[0, 0], [padding, padding], [padding, padding], [0, 0]])
             kernel = tf.Variable(tf.truncated_normal([3, 3, nInputPlane, nOutputPlane], dtype=tf.float32, stddev=1e-2, seed=self.seed), trainable=self.trainable, name='conv_kernel')
@@ -26,18 +26,7 @@ class Model(object):
             print(kernel)
         return conv
 
-    def Convolution(self, imgInput, nInputPlane, nOutputPlane, stride, padding):
-        with tf.name_scope('Convolution') as scope:
-            imgInput = tf.pad(imgInput, [[0, 0], [padding, padding], [padding, padding], [0, 0]])
-            kernel = tf.Variable(tf.truncated_normal([3, 3, nInputPlane, nOutputPlane], dtype=tf.float32, stddev=1e-2, seed=self.seed), trainable=self.trainable, name='conv_kernel')
-            conv = tf.nn.conv2d(imgInput, filter=kernel, strides=[1, stride, stride, 1], padding='VALID', name="conv")
-            biases = tf.Variable(tf.constant(0.0, shape=[nOutputPlane], dtype=tf.float32), trainable=self.trainable, name='bias')
-            imgOutput = tf.nn.bias_add(conv, biases, name=scope)
-            print(kernel)
-            print(biases)
-        return imgOutput
-
-    def Convolution_dim(self, imgInput, nInputPlane, nOutputPlane, stride, padding):
+    def conv2d_dim(self, imgInput, nInputPlane, nOutputPlane, stride, padding):
         with tf.name_scope('Convolution_dim') as scope:
             imgInput = tf.pad(imgInput, [[0, 0], [padding, padding], [padding, padding], [0, 0]])
             kernel = tf.Variable(tf.truncated_normal([1, 1, nInputPlane, nOutputPlane], dtype=tf.float32, stddev=1e-2, seed=self.seed), trainable=self.trainable, name='conv_kernel')
@@ -56,27 +45,38 @@ class Model(object):
             print(fcb)
         return imgOutput
 
+    def batch_norm(self, imgInput, bnN):
+        with tf.name_scope('bn') as scope:
+            weight= tf.Variable(tf.random.uniform(shape=[bnN], minval=0.0, maxval=1.0, dtype=tf.float32, seed=self.seed), trainable=self.trainable, name='weight')
+            bias = tf.Variable(tf.constant(0.0, shape=[bnN], dtype=tf.float32), trainable=self.trainable, name='bias')
+            running_mean = tf.Variable(tf.constant(0.0, shape=[bnN], dtype=tf.float32), trainable=False, name='running_mean')
+            running_var = tf.Variable(tf.constant(1.0, shape=[bnN], dtype=tf.float32), trainable=False, name='running_var')
+            batchNorm = BatchNormalization(axis=-1, beta_initializer=bias, gamma_initializer=weight,
+                                           moving_mean_initializer=running_mean, moving_variance_initializer=running_var,
+                                           center=True, scale=True, name='BatchNormal')(imgInput)
+            print(weight)
+            print(bias)
+            print(running_mean)
+            print(running_var)
+        return batchNorm
+
     def basic_block(self, imgInput, nInputPlane, nOutputPlane, stride):
 
         print("basic_block")
 
         with tf.name_scope('block_conv1') as scope:
-
-            batchNorm = BatchNormalization(axis=-1, name='BatchNormal', trainable=self.trainable)(imgInput)
-            o1 = tf.nn.relu(batchNorm, name='relu')
-            y = self.Convolution(o1, nInputPlane, nOutputPlane, stride=stride, padding=1)
+            o1 = tf.nn.relu(self.batch_norm(imgInput, nInputPlane), name='relu')
+            y = self.conv2d(o1, nInputPlane, nOutputPlane, stride=stride, padding=1)
             #print(y)
 
         with tf.name_scope('block_conv2') as scope:
-
-            batchNorm = BatchNormalization(axis=-1, name='BatchNormal', trainable=self.trainable)(y)
-            o2 = tf.nn.relu(batchNorm, name='relu')
+            o2 = tf.nn.relu(self.batch_norm(y, nOutputPlane), name='relu')
             # dropout = tf.nn.dropout(relu, 0.3, seed=self.seed)
-            z = self.Convolution(o2, nOutputPlane, nOutputPlane, stride=1, padding=1)
+            z = self.conv2d(o2, nOutputPlane, nOutputPlane, stride=1, padding=1)
             #print(z)
 
         if nInputPlane != nOutputPlane:
-            output = z + self.Convolution_dim(o1, nInputPlane, nOutputPlane, stride=stride, padding=0)
+            output = z + self.conv2d_dim(o1, nInputPlane, nOutputPlane, stride=stride, padding=0)
         else:
             output = z + imgInput
         # print(output)
@@ -98,48 +98,17 @@ class Model(object):
 
         nStages = [16, 16 * k, 32 * k, 64 * k]
 
-        conv1 = self.Convolution_without_bias(rgb, self.num_channels, nStages[0], stride=1, padding=1)
-        #print(conv1)
-        group1 = self.group(conv1, nStages[0], nStages[1], n, 1)
-        group2 = self.group(group1, nStages[1], nStages[2], n, 2)
-        group3 = self.group(group2, nStages[2], nStages[3], n, 2)
+        x = self.conv2d(rgb, self.num_channels, nStages[0], stride=1, padding=1)
+        g0 = self.group(x, nStages[0], nStages[1], n, 1)
+        g1 = self.group(g0, nStages[1], nStages[2], n, 2)
+        g2 = self.group(g1, nStages[2], nStages[3], n, 2)
 
-        batchNorm = BatchNormalization(axis=-1, name='BatchNormal', trainable=self.trainable)(group3)
-        relu = tf.nn.relu(batchNorm, name='relu')
+        relu = tf.nn.relu(self.batch_norm(g2, nStages[3]), name='relu')
         averagePool = tf.nn.avg_pool(relu, ksize=[1, 8, 8, 1], strides=[1, 1, 1, 1], padding='VALID', name='averagePool')
-        #print(averagePool)
         self.fc = self.FullyConnect(averagePool, num_classes)
-        #print(self.fc)
-        self.softmax = tf.nn.softmax(self.fc)
-        #print(self.softmax)
-        return self
-
-    def build_conv1fc1(self, rgb, num_classes):
-        print("build_conv1fc1")
-        K.set_learning_phase(True)
-        conv = self.Convolution(rgb, self.num_channels, 16, stride=1, padding=1)
-        relu = tf.nn.relu(conv, name='relu')
-        self.fc = self.FullyConnect(relu, num_classes)
         self.softmax = tf.nn.softmax(self.fc)
         return self
 
-    def build_resnet_conv1Block1Fc1(self, rgb, num_classes, k):
-        print("build_resnet_conv1Block1Fc1")
-        K.set_learning_phase(True)
-        nStages = [16, 16 * k, 32 * k, 64 * k]
-        conv1 = self.Convolution(rgb, self.num_channels, nStages[0], stride=1, padding=1)
-        print(conv1)
-        block = self.basic_block(conv1,  nStages[0],  nStages[1], 2)
-        batchNorm = BatchNormalization(axis=-1, name='BatchNormal')(block)
-        relu = tf.nn.relu(batchNorm, name='relu')
-        print(relu)
-        averagePool = tf.nn.avg_pool(relu, ksize=[1, 8, 8, 1], strides=[1, 1, 1, 1], padding='SAME', name='averagePool')
-        print(averagePool)
-        self.fc = self.FullyConnect(averagePool, num_classes)
-        print(self.fc)
-        self.softmax = tf.nn.softmax(self.fc)
-        print(self.softmax)
-        return self
 
     def loss(self, labels):
         cross_entropy = tf.nn.sparse_softmax_cross_entropy_with_logits(labels=labels, logits=self.fc, name='crossEntropy')

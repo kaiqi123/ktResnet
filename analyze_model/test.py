@@ -31,32 +31,33 @@ def g(inputs, params):
         for i in range(0, n):
             b_base = ('%s.block%d.conv') % (base, i)
             x = o
-            o = conv2d(x, params, b_base + '0')
+            o1 = tf.nn.relu(x)
+            o = conv2d(o1, params, b_base + '0', stride=stride, padding=1)
             o = tf.nn.relu(o)
             o = conv2d(o, params, b_base + '1', stride=i == 0 and stride or 1, padding=1)
-            o = tf.nn.relu(o)
-            o = conv2d(o, params, b_base + '2')
             if i == 0:
                 o += conv2d(x, params, b_base + '_dim', stride=stride)
             else:
                 o += x
-            o = tf.nn.relu(o)
         return o
 
     # determine network size by parameters
-    blocks = [sum([re.match('group%d.block\d+.conv0.weight' % j, k) is not None
-                   for k in params.keys()]) for j in range(4)]
+    #blocks = [sum([re.match('group%d.block\d+.conv0.weight' % j, k) is not None
+    #               for k in params.keys()]) for j in range(4)]
+    depth = 28
+    width = 10
+    assert (depth - 4) % 6 == 0, 'depth should be 6n+4'
+    n = (depth - 4) // 6
+    widths = [int(v * width) for v in (16, 32, 64)]
 
-    o = conv2d(inputs, params, 'conv0', 2, 3)
-    o = tf.nn.relu(o)
-    o = tf.pad(o, [[0, 0], [1, 1], [1, 1], [0, 0]])
-    o = tf.nn.max_pool(o, ksize=[1, 3, 3, 1], strides=[1, 2, 2, 1], padding='VALID')
-    o_g0 = group(o, params, 'group0', 1, blocks[0])
-    o_g1 = group(o_g0, params, 'group1', 2, blocks[1])
-    o_g2 = group(o_g1, params, 'group2', 2, blocks[2])
-    o_g3 = group(o_g2, params, 'group3', 2, blocks[3])
-    o = tf.nn.avg_pool(o_g3, ksize=[1, 7, 7, 1], strides=[1, 1, 1, 1], padding='VALID')
-    o = tf.reshape(o, [-1, 2048])
+    o = conv2d(inputs, params, 'conv0', padding=1)
+    o_g0 = group(o, params, 'group0', 1, n)
+    o_g1 = group(o_g0, params, 'group1', 2, n)
+    o_g2 = group(o_g1, params, 'group2', 2, n)
+
+    o = tf.nn.relu(o_g2)
+    o = tf.nn.avg_pool(o, ksize=[1, 8, 8, 1], strides=[1, 1, 1, 1], padding='VALID')
+    o = tf.reshape(o, [-1, int(np.prod(o.get_shape()[1:]))])
     o = tf.matmul(o, params['fc.weight']) + params['fc.bias']
     return o
 
