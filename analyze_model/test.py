@@ -60,21 +60,15 @@ def g(inputs, params):
     o = tf.matmul(o, params['fc.weight']) + params['fc.bias']
     return o
 
-checkpoint = torch.load('model.pt7')
-print(checkpoint.keys())
-params = checkpoint['params']
 
-for k, v in sorted(params.items()):
-    print(k, tuple(v.shape))
-    params[k] = Variable(v, requires_grad=False)
-print('\nTotal parameters:', sum(v.numel() for v in params.values()))
+
 
 inputs = torch.randn(1,3,224,224)
 
 #y = f(Variable(inputs), params)
 #print(y)
 
-params = {k: v.cpu().numpy() for k, v in params.items()}
+params = {k: v.detach().cpu().numpy() for k, v in torch.load('model.pt7')['params'].items()}
 print(params)
 inputs_tf = tf.placeholder(tf.float32, shape=[None, 224, 224, 3])
 
