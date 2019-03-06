@@ -74,7 +74,7 @@ inputs = torch.randn(1,3,224,224)
 #y = f(Variable(inputs), params)
 #print(y)
 
-params = {k: v.numpy() for k, v in params.items()}
+params = {k: v.cpu().numpy() for k, v in params.items()}
 print(params)
 inputs_tf = tf.placeholder(tf.float32, shape=[None, 224, 224, 3])
 
