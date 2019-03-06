@@ -10,13 +10,14 @@ from tensorflow.python.keras import backend as K
 
 class Model(object):
 
-    def __init__(self, num_channels, seed, trainable=True):
+    def __init__(self, num_channels, seed, trainable=True, phase_train=True):
         self.trainable = trainable
         self.parameters = []
         self.num_channels = num_channels
         self.seed = seed
         self.fc = None
         self.softmax = None
+        self.phase_train = phase_train
 
     def conv2d(self, imgInput, nInputPlane, nOutputPlane, stride, padding):
         with tf.name_scope('Convolution') as scope:
@@ -47,15 +48,15 @@ class Model(object):
 
     def batch_norm(self, imgInput, bnN):
         with tf.name_scope('bn') as scope:
-            weight= tf.Variable(tf.random_uniform(shape=[bnN], minval=0.0, maxval=1.0, dtype=tf.float32, seed=self.seed), trainable=self.trainable, name='weight')
-            bias = tf.Variable(tf.constant(0.0, shape=[bnN], dtype=tf.float32), trainable=self.trainable, name='bias')
-            running_mean = tf.Variable(tf.constant(0.0, shape=[bnN], dtype=tf.float32), trainable=False, name='running_mean')
-            running_var = tf.Variable(tf.constant(1.0, shape=[bnN], dtype=tf.float32), trainable=False, name='running_var')
+            #weight= tf.Variable(tf.random_uniform(shape=[bnN], minval=0.0, maxval=1.0, dtype=tf.float32, seed=self.seed), trainable=self.trainable, name='weight')
+            #bias = tf.Variable(tf.constant(0.0, shape=[bnN], dtype=tf.float32), trainable=self.trainable, name='bias')
+            #running_mean = tf.Variable(tf.constant(0.0, shape=[bnN], dtype=tf.float32), trainable=False, name='running_mean')
+            #running_var = tf.Variable(tf.constant(1.0, shape=[bnN], dtype=tf.float32), trainable=False, name='running_var')
 
-            #weight = tf.random_normal_initializer(1.0, 0.0)
-            #bias = tf.constant_initializer(0.)
-            #running_mean = tf.constant_initializer(0.)
-            #running_var = tf.ones_initializer()
+            weight = tf.random_normal_initializer(1.0, 0.0)
+            bias = tf.constant_initializer(0.)
+            running_mean = tf.constant_initializer(0.)
+            running_var = tf.ones_initializer()
 
             params = {
                 'beta': bias,
@@ -63,7 +64,7 @@ class Model(object):
                 'moving_mean': running_mean,
                 'moving_variance': running_var
             }
-            batchNorm = tf.contrib.layers.batch_norm(imgInput, center=True, scale=True, param_initializers=params, is_training=self.trainable, scope=scope)
+            batchNorm = tf.contrib.layers.batch_norm(imgInput, center=True, scale=True, param_initializers=params, is_training=self.phase_train, scope=scope)
 
             print(weight)
             print(bias)
