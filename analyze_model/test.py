@@ -61,15 +61,15 @@ def g(inputs, params):
     return o
 
 
-
-
 inputs = torch.randn(1,3,224,224)
 
 #y = f(Variable(inputs), params)
 #print(y)
 
 params = {k: v.detach().cpu().numpy() for k, v in torch.load('model.pt7')['params'].items()}
-print(params)
+for k, v in sorted(params.items()):
+    print(k, tuple(v.shape))
+
 inputs_tf = tf.placeholder(tf.float32, shape=[None, 224, 224, 3])
 
 out = g(inputs_tf, params)
