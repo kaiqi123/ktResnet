@@ -29,8 +29,9 @@ class Model(object):
             return v
 
         params = {k: v.detach().cpu().numpy() for k, v in torch.load('cifar10_input/model_d28w10.pt7')['params'].items()}
-        #for k, v in sorted(params.items()):
-        #    print(k, tuple(v.shape))
+        for k, v in sorted(params.items()):
+            print(k, tuple(v.shape))
+        print("---------------------")
         params_new = {}
         for k, v in params.items():
             if 'bn' in k:
