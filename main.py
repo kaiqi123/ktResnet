@@ -1,7 +1,8 @@
 import tensorflow as tf
 import numpy as np
 from DataInput import DataInput
-from ModelConstruct import Model
+# from ModelConstruct import Model
+from ModelConstruct_Pretrained import Model
 import time
 import sys
 import argparse
@@ -89,7 +90,7 @@ class Resnet(object):
         print("Define Teacher")
         mentor = Model(FLAGS.num_channels, SEED)
         # mentor_data_dict = mentor.build_teacher_model(images_placeholder, FLAGS.num_classes, Widen_Factor, TeacherModel_N, phase_train)
-        mentor_data_dict = mentor_data_dictmentor.build_teacher_model(self, input, TeacherModel_N, phase_train)
+        mentor_data_dict = mentor.build_teacher_model(images_placeholder, TeacherModel_N, phase_train)
         #mentor_data_dict = mentor.build_vgg_conv1fc1(images_placeholder, FLAGS.num_classes)
         self.loss = mentor.loss(labels_placeholder)
 

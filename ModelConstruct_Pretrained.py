@@ -29,11 +29,11 @@ class Model(object):
             return v
 
         params = {k: v.detach().cpu().numpy() for k, v in torch.load('cifar10_input/model.pt7')['params'].items()}
-        #for k, v in sorted(params.items()):
-        #    print(k, tuple(v.shape))
-        params = {k: tf.constant(tr(v)) for k, v in params.items()}
         for k, v in sorted(params.items()):
-            print(k, v)
+            print(k, tuple(v.shape))
+        params = {k: tf.constant(tr(v)) for k, v in params.items()}
+        #for k, v in sorted(params.items()):
+        #    print(k, v)
         return params
 
     def batch_norm(self, x, params, base, mode):
@@ -51,6 +51,7 @@ class Model(object):
     def conv2d(self, x, params, stride=1, padding=0):
         x = tf.pad(x, [[0, 0], [padding, padding], [padding, padding], [0, 0]])
         z = tf.nn.conv2d(x, params, [1, stride, stride, 1], padding='VALID')
+        print(params)
         return z
 
     def block(self, x, params, base, mode, stride):
