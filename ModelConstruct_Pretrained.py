@@ -46,10 +46,10 @@ class Model(object):
 
         #batchNorm = BatchNormalization(axis=-1, name='BatchNorm', trainable=self.trainable)(imgInput)
         params = {
-            'beta': params[base + '.bias'],
-            'gamma': params[base + '.weight'],
-            'moving_mean': params[base + '.running_mean'],
-            'moving_variance': params[base + '.running_var']
+            'beta': tf.constant_initializer(params[base + '.bias']),
+            'gamma': tf.constant_initializer(params[base + '.weight']),
+            'moving_mean': tf.constant_initializer(params[base + '.running_mean']),
+            'moving_variance': tf.constant_initializer(params[base + '.running_var'])
         }
         batchNorm = tf.contrib.layers.batch_norm(x, center=True, scale=True, param_initializers=params, is_training=mode)
         return batchNorm
