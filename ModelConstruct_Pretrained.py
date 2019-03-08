@@ -61,7 +61,7 @@ class Model(object):
     def conv2d(self, x, params, stride=1, padding=0):
         x = tf.pad(x, [[0, 0], [padding, padding], [padding, padding], [0, 0]])
         z = tf.nn.conv2d(x, params, [1, stride, stride, 1], padding='VALID')
-        print(params)
+        # print(params)
         return z
 
     def block(self, x, params, base, mode, stride):
