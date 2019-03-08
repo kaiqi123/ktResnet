@@ -28,7 +28,7 @@ class Model(object):
                 return v.transpose()
             return v
 
-        params = {k: v.detach().cpu().numpy() for k, v in torch.load('cifar10_input/model.pt7')['params'].items()}
+        params = {k: v.detach().cpu().numpy() for k, v in torch.load('cifar10_input/model_d28w10.pt7')['params'].items()}
         for k, v in sorted(params.items()):
             print(k, tuple(v.shape))
         params = {k: tf.constant(tr(v)) for k, v in params.items()}

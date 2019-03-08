@@ -7,7 +7,7 @@ from torch.autograd import Variable
 import numpy as np
 import pickle
 
-checkpoint = torch.load('model.pt7')
+checkpoint = torch.load('model_d28w10.pt7')
 print(checkpoint.keys())
 params = checkpoint['params']
 
