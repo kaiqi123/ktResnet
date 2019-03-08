@@ -35,7 +35,7 @@ class Model(object):
         params_new = {}
         for k, v in sorted(params.items()):
             if 'bn' in k:
-                params_new[k] = v.T
+                params_new[k] = tf.constant(v.transpose())
                 print(k, params_new[k].shape)
             else:
                 params_new[k] = tf.constant(tr(v))
@@ -49,8 +49,9 @@ class Model(object):
     def batch_norm(self, x, params, base, mode):
 
         #batchNorm = BatchNormalization(axis=-1, name='BatchNorm', trainable=self.trainable)(imgInput)
+        bias = tf.constant_initializer(params[base + '.bias'])
         params_init = {
-            'beta': tf.constant_initializer(params[base + '.bias']),
+            'beta': ,
             'gamma': tf.constant_initializer(params[base + '.weight']),
             'moving_mean': tf.constant_initializer(params[base + '.running_mean']),
             'moving_variance': tf.constant_initializer(params[base + '.running_var'])
