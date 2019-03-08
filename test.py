@@ -1,7 +1,7 @@
 import tensorflow as tf
 
 init = tf.constant_initializer(value=0)
-print(a)
+print(init)
 
 print('fitting shape:')
 with tf.Session():
