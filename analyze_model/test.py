@@ -3,7 +3,7 @@ import numpy as np
 import re
 import torch
 from torch.autograd import Variable
-
+from tensorflow.python.keras.layers import BatchNormalization
 
 def g(inputs, params):
 
@@ -19,7 +19,8 @@ def g(inputs, params):
     #for k, v in sorted(params.items()):
     #    print(k, v)
 
-    def conv2d(x, params, name, stride=1, padding=0):
+
+    def conv2d(x, params, name, stride, padding):
         x = tf.pad(x, [[0, 0], [padding, padding], [padding, padding], [0, 0]])
         z = tf.nn.conv2d(x, params['%s.weight' % name], [1, stride, stride, 1], padding='VALID')
         if '%s.bias' % name in params:
@@ -27,17 +28,28 @@ def g(inputs, params):
         else:
             return z
 
+    def block(x, params, base, mode, stride):
+        o1 = tf.nn.relu(batch_norm(x, mode))
+        y = conv2d(o1, params[base + '.conv0'], stride=stride, padding=1)
+        o2 = tf.nn.relu(utils.batch_norm(y, params, base + '.bn1', mode), inplace=True)
+        z = conv2d(o2, params[base + '.conv1'], stride=1, padding=1)
+        if base + '.convdim' in params:
+            return z + conv2d(o1, params[base + '.convdim'], stride=stride)
+        else:
+            return z + x
+
+
     def group(input, params, base, stride, n):
         o = input
         for i in range(0, n):
             b_base = ('%s.block%d.conv') % (base, i)
             x = o
-            o1 = tf.nn.relu(x)
-            o = conv2d(o1, params, b_base + '0', stride=stride, padding=1)
-            o = tf.nn.relu(o)
-            o = conv2d(o, params, b_base + '1', stride=i == 0 and stride or 1, padding=1)
+            o1 = tf.nn.relu()
+            y = conv2d(o1, params, b_base + '0', stride=stride, padding=1)
+            o2 = tf.nn.relu(BatchNormalization(axis=-1, name='BatchNorm', trainable=True)(y))
+            z = conv2d(o2, params, b_base + '1', stride=1, padding=1)
             if i == 0:
-                o += conv2d(x, params, b_base + '_dim', stride=stride)
+                o = z + conv2d(o1, params, b_base + '_dim', stride=stride)
             else:
                 o += x
         return o
