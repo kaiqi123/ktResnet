@@ -69,10 +69,10 @@ class Model(object):
         return o
 
 
-    def build_teacher_model(self, input, params, n, mode):
+    def build_teacher_model(self, input, n, mode):
 
         K.set_learning_phase(True)
-
+        params = self.params
         x = self.conv2d(input, params['conv0'], padding=1)
         g0 = self.group(x, params, 'group0', mode, 1, n)
         g1 = self.group(g0, params, 'group1', mode, 2, n)
