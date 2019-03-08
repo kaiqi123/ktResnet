@@ -17,7 +17,9 @@ def g(inputs, params):
 
     params = {k: tf.constant(tr(v)) for k, v in params.items()}
     for k, v in sorted(params.items()):
-        print(k, tuple(v.shape))
+        print(type(v))
+        print(v)
+        print(k, v.shape)
 
     def conv2d(x, params, name, stride=1, padding=0):
         x = tf.pad(x, [[0, 0], [padding, padding], [padding, padding], [0, 0]])
