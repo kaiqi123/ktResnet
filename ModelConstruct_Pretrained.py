@@ -31,8 +31,14 @@ class Model(object):
         params = {k: v.detach().cpu().numpy() for k, v in torch.load('cifar10_input/model_d28w10.pt7')['params'].items()}
         #for k, v in sorted(params.items()):
         #    print(k, tuple(v.shape))
-        params = {k: tf.constant(tr(v)) for k, v in params.items() if 'bn' in k}
-        for k, v in sorted(params.items()):
+        params_new = {}
+        for k, v in params.items():
+            if 'bn' in k:
+                params_new[k] = tr(v)
+            else:
+                params_new[k] = tf.constant(tr(v))
+        # params = {k: tf.constant(tr(v)) for k, v in params.items()}
+        for k, v in sorted(params_new.items()):
             print(k, type(v))
         return params
 
