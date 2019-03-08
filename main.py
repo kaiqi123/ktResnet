@@ -160,7 +160,7 @@ class Resnet(object):
                     train_acc = self.do_eval(sess, eval_correct, self.softmax, images_placeholder, labels_placeholder, data_input_train,'Train', phase_train)
                     Train_accuracy_List.append(train_acc)
                     print(Train_accuracy_List)
-                    print ("max test accuracy % f", max(Train_accuracy_List))
+                    print ("max train accuracy % f", max(Train_accuracy_List))
 
                     print ("Test  Data Eval:")
                     test_acc = self.do_eval(sess, eval_correct, self.softmax, images_placeholder, labels_placeholder, data_input_test, 'Test', phase_train)

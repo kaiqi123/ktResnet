@@ -19,8 +19,7 @@ def g(inputs, params):
 
     def conv2d(x, params, name, stride=1, padding=0):
         x = tf.pad(x, [[0, 0], [padding, padding], [padding, padding], [0, 0]])
-        z = tf.nn.conv2d(x, params['%s.weight' % name], [1, stride, stride, 1],
-                         padding='VALID')
+        z = tf.nn.conv2d(x, params['%s.weight' % name], [1, stride, stride, 1], padding='VALID')
         if '%s.bias' % name in params:
             return tf.nn.bias_add(z, params['%s.bias' % name])
         else:
