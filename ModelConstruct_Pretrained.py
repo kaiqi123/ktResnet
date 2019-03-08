@@ -46,13 +46,13 @@ class Model(object):
     def batch_norm(self, x, params, base, mode):
 
         #batchNorm = BatchNormalization(axis=-1, name='BatchNorm', trainable=self.trainable)(imgInput)
-        params = {
+        params_init = {
             'beta': tf.constant_initializer(params[base + '.bias']),
             'gamma': tf.constant_initializer(params[base + '.weight']),
             'moving_mean': tf.constant_initializer(params[base + '.running_mean']),
             'moving_variance': tf.constant_initializer(params[base + '.running_var'])
         }
-        batchNorm = tf.contrib.layers.batch_norm(x, center=True, scale=True, param_initializers=params, is_training=mode)
+        batchNorm = tf.contrib.layers.batch_norm(x, center=True, scale=True, param_initializers=params_init, is_training=mode)
         return batchNorm
 
     def conv2d(self, x, params, stride=1, padding=0):
