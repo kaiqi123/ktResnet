@@ -35,12 +35,14 @@ class Model(object):
         for k, v in params.items():
             if 'bn' in k:
                 params_new[k] = tr(v)
+                print(k, params_new[k].shape)
             else:
                 params_new[k] = tf.constant(tr(v))
+                print(k, tf.shape(params_new[k]))
         # params = {k: tf.constant(tr(v)) for k, v in params.items()}
         # params = {k: tf.constant(tr(v)) for k, v in params.items()}
-        for k, v in sorted(params_new.items()):
-            print(k, type(v))
+        # for k, v in sorted(params_new.items()):
+        #    print(k, type(v))
         return params
 
     def batch_norm(self, x, params, base, mode):
