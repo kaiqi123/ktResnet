@@ -1,14 +1,10 @@
-import tensorflow as tf
 
-value = [0, 1, 2, 3, 4, 5, 6, 7]
-init = tf.constant_initializer(value=0)
-print(init)
+import numpy as np
 
-
-print('fitting shape:')
-with tf.Session():
-    x = tf.get_variable('x', shape=[2, 4], initializer=init)
-    x.initializer.run()
-    print(x.eval())
+v = np.matrix([1,2,3],[4,5,6])
+print(v)
+print(v.shape)
+print(v.transpose())
+print(v.transpose().shape)
 
 
