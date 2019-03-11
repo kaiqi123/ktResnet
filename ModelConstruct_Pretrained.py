@@ -34,20 +34,20 @@ class Model(object):
         # for k, v in sorted(params.items()):
         #    print(k, tuple(v.shape))
         #print("---------------------")
-        """
+
         params_new = {}
         for k, v in sorted(params.items()):
             if 'bn' in k:
-                #
-                print(k, v.shape)
+                params_new[k] = tr(v)
+                print(k, params_new[k].shape)
                 #print(k, v.transpose().shape)
                 #print(v.transpose().shape[0])
                 # print()
             else:
-                # params_new[k] = tf.constant(tr(v))
+                params_new[k] = tf.constant(tr(v))
                 print(k, params_new[k].shape)
-        """
-        params = {k: tf.constant(tr(v)) for k, v in params.items()}
+
+        # params = {k: tf.constant(tr(v)) for k, v in params.items()}
         #for k, v in sorted(params_new.items()):
         #    print(k, type(v))
         return params
