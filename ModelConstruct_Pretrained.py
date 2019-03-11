@@ -37,9 +37,9 @@ class Model(object):
             if 'bn' in k:
                 # params_new[k] = tf.constant(v.transpose())
                 print(k, v.shape)
-                print(v.shape[0])
-                print(k, v.transpose().shape)
-                print(v.transpose().shape[0])
+                print(v)
+                #print(k, v.transpose().shape)
+                #print(v.transpose().shape[0])
                 # print()
             else:
                 params_new[k] = tf.constant(tr(v))
