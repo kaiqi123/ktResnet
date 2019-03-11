@@ -29,18 +29,18 @@ class Model(object):
             return v
 
         params = {k: v.detach().cpu().numpy() for k, v in torch.load('cifar10_input/model_d28w10.pt7')['params'].items()}
-        for k, v in sorted(params.items()):
-            print(k, tuple(v.shape))
-        print("---------------------")
+        # for k, v in sorted(params.items()):
+        #    print(k, tuple(v.shape))
+        #print("---------------------")
         params_new = {}
         for k, v in sorted(params.items()):
             if 'bn' in k:
-                params_new[k] = tf.constant(v.transpose())
-                print(k, params_new[k].shape)
+                # params_new[k] = tf.constant(v.transpose())
+                print(k, v.ndim)
+                # print()
             else:
                 params_new[k] = tf.constant(tr(v))
                 print(k, tf.shape(params_new[k]))
-        # params = {k: tf.constant(tr(v)) for k, v in params.items()}
         # params = {k: tf.constant(tr(v)) for k, v in params.items()}
         #for k, v in sorted(params_new.items()):
         #    print(k, type(v))
@@ -50,11 +50,14 @@ class Model(object):
 
         #batchNorm = BatchNormalization(axis=-1, name='BatchNorm', trainable=self.trainable)(imgInput)
         bias = tf.constant_initializer(params[base + '.bias'])
+        weight = tf.constant_initializer(params[base + '.weight'])
+        moving_mean = tf.constant_initializer(params[base + '.running_mean'])
+        moving_variance = tf.constant_initializer(params[base + '.running_var'])
         params_init = {
-            'beta': ,
-            'gamma': tf.constant_initializer(params[base + '.weight']),
-            'moving_mean': tf.constant_initializer(params[base + '.running_mean']),
-            'moving_variance': tf.constant_initializer(params[base + '.running_var'])
+            'beta': bias,
+            'gamma': weight,
+            'moving_mean': moving_mean,
+            'moving_variance': moving_variance
         }
         batchNorm = tf.contrib.layers.batch_norm(x, center=True, scale=True, param_initializers=params_init, is_training=mode)
         return batchNorm
