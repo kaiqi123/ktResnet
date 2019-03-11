@@ -36,7 +36,7 @@ class Model(object):
         for k, v in sorted(params.items()):
             if 'bn' in k:
                 # params_new[k] = tf.constant(v.transpose())
-                print(k, v)
+                print(k, v.shape)
                 # print()
             else:
                 params_new[k] = tf.constant(tr(v))
