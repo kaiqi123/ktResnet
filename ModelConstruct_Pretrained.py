@@ -26,25 +26,28 @@ class Model(object):
                 return v.transpose(2, 3, 1, 0)
             elif v.ndim == 2:
                 return v.transpose()
+            elif v.ndim == 1:
+                return v.reshape((-1, 1))
             return v
 
         params = {k: v.detach().cpu().numpy() for k, v in torch.load('cifar10_input/model_d28w10.pt7')['params'].items()}
         # for k, v in sorted(params.items()):
         #    print(k, tuple(v.shape))
         #print("---------------------")
+        """
         params_new = {}
         for k, v in sorted(params.items()):
             if 'bn' in k:
-                # params_new[k] = tf.constant(v.transpose())
+                #
                 print(k, v.shape)
-                print(v)
                 #print(k, v.transpose().shape)
                 #print(v.transpose().shape[0])
                 # print()
             else:
-                params_new[k] = tf.constant(tr(v))
-                print(k, tf.shape(params_new[k]))
-        # params = {k: tf.constant(tr(v)) for k, v in params.items()}
+                # params_new[k] = tf.constant(tr(v))
+                print(k, params_new[k].shape)
+        """
+        params = {k: tf.constant(tr(v)) for k, v in params.items()}
         #for k, v in sorted(params_new.items()):
         #    print(k, type(v))
         return params
