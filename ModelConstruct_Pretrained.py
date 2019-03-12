@@ -18,7 +18,7 @@ class Model(object):
         self.fc = None
         self.softmax = None
         #self.phase_train = phase_train
-        self.params = self.read_parameters()
+        #self.params = self.read_parameters()
 
     def read_parameters(self):
         def tr(v):
@@ -151,7 +151,7 @@ class Model(object):
     def test(self, input, n, mode):
 
         K.set_learning_phase(True)
-        params = self.params
+        params = self.read_parameters()
         x = self.conv2d(input, params['conv0'], padding=1)
         o = tf.nn.relu(x)
         self.fc = self.FullyConnect(o, 10)
