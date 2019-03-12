@@ -137,6 +137,26 @@ class Model(object):
         print(self.fc)
         return self
 
+    def FullyConnect(self, imgInput, nOutputPlane):
+        with tf.name_scope('FullyConnect') as scope:
+            shape = int(np.prod(imgInput.get_shape()[1:]))
+            fcw = tf.Variable(tf.truncated_normal([shape, nOutputPlane], dtype=tf.float32, stddev=1e-2, seed=self.seed), trainable=self.trainable, name='weights')
+            fcb = tf.Variable(tf.constant(0.0, shape=[nOutputPlane], dtype=tf.float32), trainable=self.trainable, name='biases')
+            flat = tf.reshape(imgInput, [-1, shape])
+            imgOutput = tf.nn.bias_add(tf.matmul(flat, fcw), fcb)
+            print(fcw)
+            print(fcb)
+        return imgOutput
+
+    def test(self, input, n, mode):
+
+        K.set_learning_phase(True)
+        params = self.params
+        x = self.conv2d(input, params['conv0'], padding=1)
+        o = tf.nn.relu(x)
+        self.fc = self.FullyConnect(o, 10)
+        self.softmax = tf.nn.softmax(self.fc)
+
 
     def loss(self, labels):
         cross_entropy = tf.nn.sparse_softmax_cross_entropy_with_logits(labels=labels, logits=self.fc, name='crossEntropy')
