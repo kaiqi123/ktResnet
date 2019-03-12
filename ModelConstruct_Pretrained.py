@@ -76,7 +76,9 @@ class Model(object):
 
     def conv2d(self, x, params, stride=1, padding=0):
         x = tf.pad(x, [[0, 0], [padding, padding], [padding, padding], [0, 0]])
-        z = tf.nn.conv2d(x, params, [1, stride, stride, 1], padding='VALID')
+        kernel = tf.Variable(params, trainable=self.trainable, name='conv_kernel')
+        z = tf.nn.conv2d(x, filter=kernel, strides=[1, stride, stride, 1], padding='VALID')
+        print(kernel)
         return z
 
     def block(self, x, params, base, mode, stride):
