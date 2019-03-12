@@ -13,7 +13,8 @@ print(b.shape)
 a = tf.constant_initializer(value=0)
 
 with tf.Session():
-    x = tf.get_variable('x', shape=[2, 4], initializer=a)
+    #x = tf.get_variable('x', shape=[2, 4], initializer=a)
+    x = tf.get_variable('x', initializer=a)
     x.initializer.run()
     print(x.eval())
 
