@@ -3,6 +3,7 @@ from tensorflow.python.keras import backend as K
 import torch
 import tensorflow as tf
 import numpy as np
+from pretrianed_parameters import params_new
 
 class Model(object):
 
@@ -15,31 +16,6 @@ class Model(object):
         self.softmax = None
         #self.phase_train = phase_train
         #self.params = self.read_parameters()
-
-    def read_parameters(self):
-        def tr(v):
-            if v.ndim == 4:
-                return v.transpose(2, 3, 1, 0)
-            elif v.ndim == 2:
-                return v.transpose()
-            return v
-
-        params = {k: v.detach().cpu().numpy() for k, v in torch.load('cifar10_input/model_d28w10.pt7')['params'].items()}
-
-        print("Display the dimesion of the pretrained parameters: ")
-        params_new = {}
-        for k, v in sorted(params.items()):
-            if 'bn' in k:
-                params_new[k] = v
-                print(k, params_new[k].shape)
-            else:
-                params_new[k] = tr(v)
-                print(k, params_new[k].shape)
-        print("---------------------")
-        # for k, v in sorted(params.items()):
-        #    print(k, tuple(v.shape))
-        # params = {k: tf.constant(tr(v)) for k, v in params.items()}
-        return params_new
 
     def batch_norm(self, x, params, base, mode):
 
@@ -158,7 +134,7 @@ class Model(object):
 
         print("test teacher")
         K.set_learning_phase(True)
-        # params = self.read_parameters()
+
         x = self.conv2d(input, self.num_channels, 16, stride=1, padding=1)
         # x = self.conv2d(input, params['conv0'], padding=1)
         o = tf.nn.relu(x)
