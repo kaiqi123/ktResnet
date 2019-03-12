@@ -45,7 +45,7 @@ class Model(object):
                 # print()
             else:
                 params_new[k] = tf.constant(tr(v))
-                print(k, params_new[k].shape)
+                print(k, tf.shape(params_new[k]))
 
         # params = {k: tf.constant(tr(v)) for k, v in params.items()}
         #for k, v in sorted(params_new.items()):
