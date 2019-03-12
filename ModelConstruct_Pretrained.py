@@ -156,6 +156,7 @@ class Model(object):
         o = tf.nn.relu(x)
         self.fc = self.FullyConnect(o, 10)
         self.softmax = tf.nn.softmax(self.fc)
+        return self
 
 
     def loss(self, labels):

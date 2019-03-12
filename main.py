@@ -91,7 +91,6 @@ class Resnet(object):
         mentor = Model(FLAGS.num_channels, SEED)
         # mentor_data_dict = mentor.build_teacher_model(images_placeholder, FLAGS.num_classes, Widen_Factor, TeacherModel_N, phase_train)
         # mentor_data_dict = mentor.build_teacher_model(images_placeholder, TeacherModel_N, phase_train)
-
         mentor_data_dict = mentor.test(images_placeholder, TeacherModel_N, phase_train)
 
         self.loss = mentor.loss(labels_placeholder)
