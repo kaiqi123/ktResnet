@@ -1,23 +1,19 @@
-import tensorflow as tf
-import numpy as np
 
-"""
-v = np.array([1,2,3,4,5,6])
-b = v.reshape((-1, 1))
-print(v)
-print(v.shape)
-print(b)
-print(b.shape)
-"""
 
-a = tf.constant_initializer(value=0)
+import re
+import torch
+import torch.nn.functional as F
+from torch.autograd import Variable
+from torchviz import make_dot
+from torch.utils import model_zoo
 
-sess = tf.Session()
-#x = tf.get_variable('x', shape=[2, 4], initializer=a)
-#x = tf.get_variable('x', initializer=a)
-#x.initializer.run()
-tf.ones_initializer()
-x = sess.run(a)
-print(x)
+params = model_zoo.load_url('https://s3.amazonaws.com/modelzoo-networks/wide-resnet-50-2-export-5ae25d50.pth')
+
+# convert numpy arrays to torch Variables
+for k, v in sorted(params.items()):
+    print(k, tuple(v.shape))
+    params[k] = Variable(v, requires_grad=True)
+
+print('\nTotal parameters:', sum(v.numel() for v in params.values()))
 
 
