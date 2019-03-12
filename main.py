@@ -93,14 +93,14 @@ class Resnet(object):
         # mentor_data_dict = mentor.build_teacher_model(images_placeholder, TeacherModel_N, phase_train)
         self.loss = mentor.loss(labels_placeholder)
 
-        #steps_per_epoch = FLAGS.num_examples_per_epoch_for_train / FLAGS.batch_size
-        #decay_steps = int(steps_per_epoch * Num_Epoch_Per_Decay)
-        #lr = tf.train.exponential_decay(FLAGS.learning_rate, global_step, decay_steps, learningRateDecayRatio, staircase=True)
-        #print("Steps_per_epoch: "+str(steps_per_epoch))
-        #print("Decay_steps: " + str(decay_steps))
+        steps_per_epoch = FLAGS.num_examples_per_epoch_for_train / FLAGS.batch_size
+        decay_steps = int(steps_per_epoch * Num_Epoch_Per_Decay)
+        lr = tf.train.exponential_decay(FLAGS.learning_rate, global_step, decay_steps, learningRateDecayRatio, staircase=True)
+        print("Steps_per_epoch: "+str(steps_per_epoch))
+        print("Decay_steps: " + str(decay_steps))
 
-        lr = FLAGS.learning_rate
-        print("learning_rate is(not decay): " + str(lr))
+        #lr = FLAGS.learning_rate
+        #print("learning_rate is(not decay): " + str(lr))
 
         self.train_op = mentor.training(self.loss, lr, global_step)
         self.softmax = mentor_data_dict.softmax
@@ -198,7 +198,7 @@ class Resnet(object):
             print(device_lib.list_local_devices())
 
             # This line allows the code to use only sufficient memory and does not block entire GPU
-            config = tf.ConfigProto(gpu_options=tf.GPUOptions(allow_growth=True))
+            # config = tf.ConfigProto(gpu_options=tf.GPUOptions(allow_growth=True))
 
             # set the seed so that we have same loss values and initializations for every run.
             tf.set_random_seed(SEED)
