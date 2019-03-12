@@ -1,8 +1,8 @@
 import tensorflow as tf
 import numpy as np
 from DataInput import DataInput
-from ModelConstruct import Model
-# from ModelConstruct_Pretrained import Model
+# from ModelConstruct import Model
+from ModelConstruct_Pretrained import Model
 import time
 import sys
 import argparse
@@ -89,8 +89,8 @@ class Resnet(object):
 
         print("Define Teacher")
         mentor = Model(FLAGS.num_channels, SEED)
-        mentor_data_dict = mentor.build_teacher_model(images_placeholder, FLAGS.num_classes, Widen_Factor, TeacherModel_N, phase_train)
-        # mentor_data_dict = mentor.build_teacher_model(images_placeholder, TeacherModel_N, phase_train)
+        # mentor_data_dict = mentor.build_teacher_model(images_placeholder, FLAGS.num_classes, Widen_Factor, TeacherModel_N, phase_train)
+        mentor_data_dict = mentor.build_teacher_model(images_placeholder, TeacherModel_N, phase_train)
         self.loss = mentor.loss(labels_placeholder)
 
         #steps_per_epoch = FLAGS.num_examples_per_epoch_for_train / FLAGS.batch_size
@@ -99,7 +99,6 @@ class Resnet(object):
         #print("Steps_per_epoch: "+str(steps_per_epoch))
         #print("Decay_steps: " + str(decay_steps))
 
-        print(type(FLAGS.learning_rate))
         lr = tf.convert_to_tensor(FLAGS.learning_rate, dtype=tf.float32)
         print("learning_rate is(not decay): ", lr)
 
