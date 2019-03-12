@@ -104,7 +104,7 @@ class Model(object):
     def build_teacher_model(self, rgb, num_classes, k, n, phase_train):
 
 
-        if tf.equal(phase_train, 1):
+        if tf.equal(phase_train, True):
             K.clear_session()
             K.set_learning_phase(1)
         else:
