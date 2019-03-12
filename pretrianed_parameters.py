@@ -13,14 +13,3 @@ params = {k: tr(v) for k, v in params.items()}
 for k, v in sorted(params.items()):
     print(k, tuple(v.shape))
 
-"""
-for k, v in sorted(params.items()):
-    if 'bn' in k:
-        params_new[k] = v
-        print(k, params_new[k].shape)
-    else:
-        params_new[k] = tr(v)
-        print(k, params_new[k].shape)
-print("---------------------")
-params = params_new
-"""

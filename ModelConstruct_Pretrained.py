@@ -8,7 +8,6 @@ class Model(object):
 
     def __init__(self, num_channels, seed, trainable=True):
         self.trainable = trainable
-        self.parameters = []
         self.num_channels = num_channels
         self.seed = seed
         self.fc = None
@@ -47,10 +46,6 @@ class Model(object):
     def conv2d(self, x, params, stride=1, padding=0):
         x = tf.pad(x, [[0, 0], [padding, padding], [padding, padding], [0, 0]])
         kernel = tf.Variable(params, trainable=self.trainable, name='conv_kernel')
-        # size = params.shape[0]
-        # nInputPlane = params.shape[2]
-        # nOutputPlane = params.shape[3]
-        # kernel = tf.Variable(tf.truncated_normal([size, size, nInputPlane, nOutputPlane], dtype=tf.float32, stddev=1e-2, seed=self.seed),trainable=self.trainable, name='conv_kernel')
         z = tf.nn.conv2d(x, filter=kernel, strides=[1, stride, stride, 1], padding='VALID')
         print(kernel)
         return z
