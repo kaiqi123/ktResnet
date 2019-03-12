@@ -1,12 +1,12 @@
-from tensorflow.python.framework import ops
-from tensorflow.python.framework import dtypes
-import random
-import pdb
 import numpy as np
 from tensorflow.python.keras.layers import BatchNormalization
 from tensorflow.python.keras import backend as K
 import torch
 import tensorflow as tf
+from tensorflow.python.framework import ops
+from tensorflow.python.framework import dtypes
+import random
+import pdb
 
 class Model(object):
 
