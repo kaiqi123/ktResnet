@@ -50,11 +50,12 @@ class Model(object):
         with tf.name_scope('bn') as scope:
 
             """
-            batchNorm = BatchNormalization(axis=-1, name='BatchNorm', trainable=self.trainable,
-                                           beta_initializer=bias,
-                                           gamma_initializer=weight,
-                                           moving_mean_initializer=moving_mean,
-                                           moving_variance_initializer=moving_variance)(imgInput)
+            batchNorm = tf.layers.batch_normalization(imgInput, center=True, scale=True,
+                                                      beta_initializer=bias,
+                                                      gamma_initializer=weight,
+                                                      moving_mean_initializer=moving_mean,
+                                                      moving_variance_initializer=moving_variance,
+                                                      training=phase_train, trainable=self.trainable)
 
             params = {
                 'beta': bias,
@@ -63,19 +64,19 @@ class Model(object):
                 'moving_variance': running_var
             }
             batchNorm = tf.contrib.layers.batch_norm(imgInput, center=True, scale=True, param_initializers=params, is_training=phase_train, scope=scope)
-
             """
             weight = tf.random_normal_initializer(mean=1, stddev=0.045)
             bias = tf.constant_initializer(value=0)
             moving_mean = tf.constant_initializer(value=0)
             moving_variance = tf.ones_initializer()
 
-            batchNorm = tf.layers.batch_normalization(imgInput, center=True, scale=True,
-                                                      beta_initializer=bias,
-                                                      gamma_initializer=weight,
-                                                      moving_mean_initializer=moving_mean,
-                                                      moving_variance_initializer=moving_variance,
-                                                      training=phase_train, trainable=self.trainable)
+            batchNorm = BatchNormalization(axis=-1, name='BatchNorm', trainable=self.trainable,
+                                           beta_initializer=bias,
+                                           gamma_initializer=weight,
+                                           moving_mean_initializer=moving_mean,
+                                           moving_variance_initializer=moving_variance)(imgInput)
+
+
 
             print(weight)
             print(bias)
@@ -118,7 +119,12 @@ class Model(object):
 
     def build_teacher_model(self, rgb, num_classes, k, n, phase_train):
 
-        K.set_learning_phase(True)
+        if phase_train:
+            K.clear_session()
+            K.set_learning_phase(1)
+        else:
+            K.clear_session()
+            K.set_learning_phase(0)
 
         nStages = [16, 16 * k, 32 * k, 64 * k]
 
@@ -140,10 +146,13 @@ class Model(object):
 
     def training(self, loss, learning_rate, global_step):
 
-        update_ops = tf.get_collection(tf.GraphKeys.UPDATE_OPS)
+        # update_ops = tf.get_collection(tf.GraphKeys.UPDATE_OPS)
         optimizer = tf.contrib.opt.MomentumWOptimizer(weight_decay=0.0005, learning_rate=learning_rate, momentum=0.9, use_nesterov=True)
         train_op = optimizer.minimize(loss, global_step=global_step)
-        train_op = tf.group([train_op, update_ops])
+        # train_op = tf.group([train_op, update_ops])
+
+        print(len(tf.get_collection(tf.GraphKeys.UPDATE_OPS)))
+
         return train_op
 
 
