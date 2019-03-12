@@ -19,6 +19,7 @@ for k, v in sorted(params.items()):
         params_new[k] = tr(v)
         print(k, params_new[k].shape)
 print("---------------------")
+params = params_new
 # for k, v in sorted(params.items()):
 #    print(k, tuple(v.shape))
 # params = {k: tf.constant(tr(v)) for k, v in params.items()}
