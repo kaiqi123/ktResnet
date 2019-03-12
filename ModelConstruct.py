@@ -74,7 +74,7 @@ class Model(object):
                                                       gamma_initializer=weight,
                                                       moving_mean_initializer=moving_mean,
                                                       moving_variance_initializer=moving_variance,
-                                                      training=phase_train, trainable=self.trainable)
+                                                      trainable=self.trainable)
             print(weight)
             print(bias)
             print(moving_mean)
@@ -138,20 +138,10 @@ class Model(object):
 
     def training(self, loss, learning_rate, global_step):
 
-        """
-        update_ops = tf.get_collection(tf.GraphKeys.UPDATE_OPS)
-        with tf.control_dependencies(update_ops):
-            # Ensures that we execute the update_ops before performing the train_step
-            tf.summary.scalar('loss', loss)
-            optimizer = tf.contrib.opt.MomentumWOptimizer(weight_decay=0.0005, learning_rate=learning_rate, momentum=0.9, use_nesterov=True)
-            train_op = optimizer.minimize(loss, global_step=global_step)
-        return train_op
-        """
-
-        update_ops = tf.get_collection(tf.GraphKeys.UPDATE_OPS)
+        # update_ops = tf.get_collection(tf.GraphKeys.UPDATE_OPS)
         optimizer = tf.contrib.opt.MomentumWOptimizer(weight_decay=0.0005, learning_rate=learning_rate, momentum=0.9, use_nesterov=True)
         train_op = optimizer.minimize(loss, global_step=global_step)
-        train_op = tf.group([train_op, update_ops])
+        # train_op = tf.group([train_op, update_ops])
         return train_op
 
 
