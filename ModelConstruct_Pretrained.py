@@ -2,7 +2,7 @@
 from tensorflow.python.keras import backend as K
 import tensorflow as tf
 import numpy as np
-from pretrianed_parameters import params_new
+from pretrianed_parameters import params
 
 class Model(object):
 
