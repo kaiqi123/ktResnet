@@ -17,6 +17,7 @@ class Model(object):
         self.seed = seed
         self.fc = None
         self.softmax = None
+        self.bn = self.batch_norm()
         #self.phase_train = phase_train
 
     def conv2d(self, imgInput, nInputPlane, nOutputPlane, stride, padding):
@@ -46,43 +47,26 @@ class Model(object):
             print(fcb)
         return imgOutput
 
-    def batch_norm(self, imgInput, bnN, phase_train):
+    def batch_norm(self):
+
         with tf.name_scope('bn') as scope:
 
-            """
-            batchNorm = tf.layers.batch_normalization(imgInput, center=True, scale=True,
-                                                      beta_initializer=bias,
-                                                      gamma_initializer=weight,
-                                                      moving_mean_initializer=moving_mean,
-                                                      moving_variance_initializer=moving_variance,
-                                                      training=phase_train, trainable=self.trainable)
-
-            params = {
-                'beta': bias,
-                'gamma': weight,
-                'moving_mean': running_mean,
-                'moving_variance': running_var
-            }
-            batchNorm = tf.contrib.layers.batch_norm(imgInput, center=True, scale=True, param_initializers=params, is_training=phase_train, scope=scope)
-            """
             weight = tf.random_normal_initializer(mean=1, stddev=0.045)
             bias = tf.constant_initializer(value=0)
             moving_mean = tf.constant_initializer(value=0)
             moving_variance = tf.ones_initializer()
 
-            batchNorm = BatchNormalization(axis=-1, name='BatchNorm', trainable=self.trainable,
+            bn = BatchNormalization(axis=-1, name='BatchNorm', trainable=self.trainable,
                                            beta_initializer=bias,
                                            gamma_initializer=weight,
                                            moving_mean_initializer=moving_mean,
-                                           moving_variance_initializer=moving_variance)(imgInput)
-
-
+                                           moving_variance_initializer=moving_variance)
 
             print(weight)
             print(bias)
             print(moving_mean)
             print(moving_variance)
-        return batchNorm
+        return bn
 
 
     def basic_block(self, imgInput, nInputPlane, nOutputPlane, stride, phase_train):
@@ -90,12 +74,12 @@ class Model(object):
         print("basic_block")
 
         with tf.name_scope('block_conv1') as scope:
-            o1 = tf.nn.relu(self.batch_norm(imgInput, nInputPlane, phase_train), name='relu')
+            o1 = tf.nn.relu(self.bn(imgInput, training=phase_train), name='relu')
             y = self.conv2d(o1, nInputPlane, nOutputPlane, stride=stride, padding=1)
             #print(y)
 
         with tf.name_scope('block_conv2') as scope:
-            o2 = tf.nn.relu(self.batch_norm(y, nOutputPlane, phase_train), name='relu')
+            o2 = tf.nn.relu(self.bn(y, training=phase_train), name='relu')
             # dropout = tf.nn.dropout(relu, 0.3, seed=self.seed)
             z = self.conv2d(o2, nOutputPlane, nOutputPlane, stride=1, padding=1)
             #print(z)
@@ -133,7 +117,7 @@ class Model(object):
         g1 = self.group(g0, nStages[1], nStages[2], n, 2, phase_train)
         g2 = self.group(g1, nStages[2], nStages[3], n, 2, phase_train)
 
-        relu = tf.nn.relu(self.batch_norm(g2, nStages[3], phase_train), name='relu')
+        relu = tf.nn.relu(self.bn(g2, training=phase_train), name='relu')
         averagePool = tf.nn.avg_pool(relu, ksize=[1, 8, 8, 1], strides=[1, 1, 1, 1], padding='VALID', name='averagePool')
         self.fc = self.FullyConnect(averagePool, num_classes)
         self.softmax = tf.nn.softmax(self.fc)
@@ -146,12 +130,22 @@ class Model(object):
 
     def training(self, loss, learning_rate, global_step):
 
-        # update_ops = tf.get_collection(tf.GraphKeys.UPDATE_OPS)
+        update_ops = tf.get_collection(self.bn.updates)
         optimizer = tf.contrib.opt.MomentumWOptimizer(weight_decay=0.0005, learning_rate=learning_rate, momentum=0.9, use_nesterov=True)
         train_op = optimizer.minimize(loss, global_step=global_step)
-        # train_op = tf.group([train_op, update_ops])
+        train_op = tf.group([train_op, update_ops])
 
-        print(len(tf.get_collection(tf.GraphKeys.UPDATE_OPS)))
+        print('variables: %d' % len(tf.get_collection(tf.GraphKeys.GLOBAL_VARIABLES)))
+        print(tf.get_collection(tf.GraphKeys.GLOBAL_VARIABLES))
+
+        print('trainable variables: %d' % len(tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES)))
+        print(tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES))
+
+        update_ops = tf.get_collection(tf.GraphKeys.UPDATE_OPS)
+        print('n_update_ops: %d' % len(update_ops))
+
+        print('n_update_ops(bn): %d' % len(self.bn.updates))
+        print(self.bn.updates)
 
         return train_op
 

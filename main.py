@@ -94,13 +94,11 @@ class Resnet(object):
 
         self.loss = mentor.loss(labels_placeholder)
 
-
         steps_per_epoch = FLAGS.num_examples_per_epoch_for_train / FLAGS.batch_size
         decay_steps = int(steps_per_epoch * Num_Epoch_Per_Decay)
         lr = tf.train.exponential_decay(FLAGS.learning_rate, global_step, decay_steps, learningRateDecayRatio, staircase=True)
         print("Steps_per_epoch: "+str(steps_per_epoch))
         print("Decay_steps: " + str(decay_steps))
-
 
         #lr = tf.convert_to_tensor(FLAGS.learning_rate, dtype=tf.float32)
         #print("learning_rate is(not decay): ", lr)
@@ -112,28 +110,6 @@ class Resnet(object):
         sess.run(init)
         self.saver = tf.train.Saver()
         return lr
-
-    def define_independent_student(self, images_placeholder, labels_placeholder, global_step, sess, SEED):
-
-        print("Define Independent student")
-        student = Model(FLAGS.num_channels, SEED)
-        if FLAGS.num_optimizers == 3:
-            mentee_data_dict = student.build_resnet_conv1Block1Fc1(images_placeholder, FLAGS.num_classes,  Widen_Factor)
-        if FLAGS.num_optimizers == 1:
-            mentee_data_dict = student.build_conv1fc1(images_placeholder, FLAGS.num_classes)
-
-        self.loss = student.loss(labels_placeholder)
-
-        steps_per_epoch = FLAGS.num_examples_per_epoch_for_train / FLAGS.batch_size
-        decay_steps = int(steps_per_epoch * Num_Epoch_Per_Decay)
-        lr = tf.train.exponential_decay(FLAGS.learning_rate, global_step, decay_steps, learningRateDecayRatio, staircase=True)
-
-        self.train_op = student.training(self.loss, lr, global_step)
-        self.softmax = mentee_data_dict.softmax
-
-        init = tf.global_variables_initializer()
-        sess.run(init)
-        self.saver = tf.train.Saver()
 
     def train_model(self, lr, data_input_train, data_input_test, images_placeholder, labels_placeholder, sess, phase_train):
 
