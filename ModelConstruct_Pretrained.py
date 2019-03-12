@@ -2,7 +2,7 @@
 from tensorflow.python.keras import backend as K
 import tensorflow as tf
 import numpy as np
-from pretrianed_parameters import params
+from Pretrianed_parameters import params
 
 class Model(object):
 
@@ -39,7 +39,7 @@ class Model(object):
                                                   gamma_initializer=weight,
                                                   moving_mean_initializer=moving_mean,
                                                   moving_variance_initializer = moving_variance,
-                                                  training=mode)
+                                                  training=mode, trainable=self.trainable)
         return batchNorm
 
 

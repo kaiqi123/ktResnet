@@ -74,7 +74,7 @@ class Model(object):
                                                       gamma_initializer=weight,
                                                       moving_mean_initializer=moving_mean,
                                                       moving_variance_initializer=moving_variance,
-                                                      training=phase_train)
+                                                      training=phase_train, trainable=self.trainable)
             print(weight)
             print(bias)
             print(moving_mean)
