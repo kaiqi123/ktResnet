@@ -1,8 +1,8 @@
 import tensorflow as tf
 import numpy as np
 from DataInput import DataInput
-from ModelConstruct import Model
-# from ModelConstruct_Pretrained import Model
+# from ModelConstruct import Model
+from ModelConstruct_Pretrained import Model
 import time
 import sys
 import argparse
@@ -89,16 +89,18 @@ class Resnet(object):
 
         print("Define Teacher")
         mentor = Model(FLAGS.num_channels, SEED)
-        mentor_data_dict = mentor.build_teacher_model(images_placeholder, FLAGS.num_classes, Widen_Factor, TeacherModel_N, phase_train)
-        # mentor_data_dict = mentor.build_teacher_model(images_placeholder, TeacherModel_N, phase_train)
-        #mentor_data_dict = mentor.build_vgg_conv1fc1(images_placeholder, FLAGS.num_classes)
+        # mentor_data_dict = mentor.build_teacher_model(images_placeholder, FLAGS.num_classes, Widen_Factor, TeacherModel_N, phase_train)
+        mentor_data_dict = mentor.build_teacher_model(images_placeholder, TeacherModel_N, phase_train)
         self.loss = mentor.loss(labels_placeholder)
 
-        steps_per_epoch = FLAGS.num_examples_per_epoch_for_train / FLAGS.batch_size
-        decay_steps = int(steps_per_epoch * Num_Epoch_Per_Decay)
-        lr = tf.train.exponential_decay(FLAGS.learning_rate, global_step, decay_steps, learningRateDecayRatio, staircase=True)
-        print("Steps_per_epoch: "+str(steps_per_epoch))
-        print("Decay_steps: " + str(decay_steps))
+        #steps_per_epoch = FLAGS.num_examples_per_epoch_for_train / FLAGS.batch_size
+        #decay_steps = int(steps_per_epoch * Num_Epoch_Per_Decay)
+        #lr = tf.train.exponential_decay(FLAGS.learning_rate, global_step, decay_steps, learningRateDecayRatio, staircase=True)
+        #print("Steps_per_epoch: "+str(steps_per_epoch))
+        #print("Decay_steps: " + str(decay_steps))
+
+        lr = FLAGS.learning_rate
+        print("learning_rate is(not decay): " + str(lr))
 
         self.train_op = mentor.training(self.loss, lr, global_step)
         self.softmax = mentor_data_dict.softmax
