@@ -99,6 +99,7 @@ class Resnet(object):
         #print("Steps_per_epoch: "+str(steps_per_epoch))
         #print("Decay_steps: " + str(decay_steps))
 
+        print(type(FLAGS.learning_rate))
         lr = tf.convert_to_tensor(FLAGS.learning_rate, dtype=tf.float32)
         print("learning_rate is(not decay): ", lr)
 
