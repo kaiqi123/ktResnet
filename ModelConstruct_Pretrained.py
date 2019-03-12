@@ -1,4 +1,4 @@
-# from tensorflow.python.keras.layers import BatchNormalization
+from tensorflow.python.keras.layers import BatchNormalization
 from tensorflow.python.keras import backend as K
 import tensorflow as tf
 import numpy as np
@@ -26,14 +26,15 @@ class Model(object):
                                        beta_initializer=bias,
                                        gamma_initializer=weight,
                                        moving_mean_initializer=moving_mean,
-                                       moving_variance_initializer=moving_variance)(imgInput)
-
+                                       moving_variance_initializer=moving_variance)(x)
+        """
         batchNorm = tf.layers.batch_normalization(x, center=True, scale=True,
                                                   beta_initializer=bias,
                                                   gamma_initializer=weight,
                                                   moving_mean_initializer=moving_mean,
                                                   moving_variance_initializer = moving_variance,
                                                   training=mode, trainable=self.trainable)
+        """
         return batchNorm
 
 
@@ -98,10 +99,10 @@ class Model(object):
         return train_op
         """
 
-        update_ops = tf.get_collection(tf.GraphKeys.UPDATE_OPS)
+        # update_ops = tf.get_collection(tf.GraphKeys.UPDATE_OPS)
         optimizer = tf.contrib.opt.MomentumWOptimizer(weight_decay=0.0005, learning_rate=learning_rate, momentum=0.9, use_nesterov=True)
         train_op = optimizer.minimize(loss, global_step=global_step)
-        train_op = tf.group([train_op, update_ops])
+        # train_op = tf.group([train_op, update_ops])
         return train_op
 
 
