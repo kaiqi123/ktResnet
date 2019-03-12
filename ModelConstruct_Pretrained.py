@@ -109,6 +109,12 @@ class Model(object):
         o = tf.reshape(o, [-1, shape])
         self.fc = tf.matmul(o, params['fc.weight']) + params['fc.bias']
         self.softmax = tf.nn.softmax(self.fc)
+
+        print(x)
+        print(g0)
+        print(g1)
+        print(g2)
+        print(self.fc)
         return self
 
 
