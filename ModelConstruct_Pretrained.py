@@ -139,16 +139,15 @@ class Model(object):
     def training(self, loss, learning_rate, global_step):
 
         """
-        tf.summary.scalar('loss', loss)
         optimizer = tf.contrib.opt.MomentumWOptimizer(weight_decay=0.0005, learning_rate=learning_rate, momentum=0.9, use_nesterov=True)
         train_op = optimizer.minimize(loss, global_step=global_step)
         return train_op
         """
 
-        update_ops = tf.get_collection(tf.GraphKeys.UPDATE_OPS)
+        # update_ops = tf.get_collection(tf.GraphKeys.UPDATE_OPS)
         optimizer = tf.contrib.opt.MomentumWOptimizer(weight_decay=0.0005, learning_rate=learning_rate, momentum=0.9, use_nesterov=True)
         train_op = optimizer.minimize(loss, global_step=global_step)
-        train_op = tf.group([train_op, update_ops])
+        # train_op = tf.group([train_op, update_ops])
         return train_op
 
 
