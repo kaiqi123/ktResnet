@@ -80,6 +80,7 @@ class Model(object):
         return z
 
     def block(self, x, params, base, mode, stride):
+
         o1 = tf.nn.relu(self.batch_norm(x, params, base + '.bn0', mode))
         y = self.conv2d(o1, params[base + '.conv0'], stride=stride, padding=1)
         o2 = tf.nn.relu(self.batch_norm(y, params, base + '.bn1', mode))
@@ -88,6 +89,7 @@ class Model(object):
             return z + self.conv2d(o1, params[base + '.convdim'], stride=stride)
         else:
             return z + x
+
 
     def group(self, o, params, base, mode, stride, n):
         for i in range(n):
@@ -104,7 +106,8 @@ class Model(object):
         g1 = self.group(g0, params, 'group1', mode, 2, n)
         g2 = self.group(g1, params, 'group2', mode, 2, n)
 
-        o = tf.nn.avg_pool(g2, ksize=[1, 8, 8, 1], strides=[1, 1, 1, 1], padding='VALID')
+        o = tf.nn.relu(self.batch_norm(g2, params, 'bn', mode))
+        o = tf.nn.avg_pool(o, ksize=[1, 8, 8, 1], strides=[1, 1, 1, 1], padding='VALID')
         shape = int(np.prod(o.get_shape()[1:]))
         o = tf.reshape(o, [-1, shape])
         self.fc = tf.matmul(o, params['fc.weight']) + params['fc.bias']
