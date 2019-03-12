@@ -162,7 +162,7 @@ class Model(object):
 
         print("test teacher")
         K.set_learning_phase(True)
-        # params = self.read_parameters()
+        params = self.read_parameters()
         x = self.conv2d(input, self.num_channels, 16, stride=1, padding=1)
         # x = self.conv2d(input, params['conv0'], padding=1)
         o = tf.nn.relu(x)
