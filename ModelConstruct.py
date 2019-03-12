@@ -49,20 +49,8 @@ class Model(object):
     def batch_norm(self, imgInput, bnN, phase_train):
         with tf.name_scope('bn') as scope:
 
-            batchNorm = BatchNormalization(axis=-1, name='BatchNorm', trainable=self.trainable)(imgInput)
-            print(batchNorm)
-
             """
-            #weight= tf.Variable(tf.random_uniform(shape=[bnN], minval=0.0, maxval=1.0, dtype=tf.float32, seed=self.seed), trainable=self.trainable, name='weight')
-            #bias = tf.Variable(tf.constant(0.0, shape=[bnN], dtype=tf.float32), trainable=self.trainable, name='bias')
-            #running_mean = tf.Variable(tf.constant(0.0, shape=[bnN], dtype=tf.float32), trainable=False, name='running_mean')
-            #running_var = tf.Variable(tf.constant(1.0, shape=[bnN], dtype=tf.float32), trainable=False, name='running_var')
-
-            weight = tf.random_normal_initializer(1.0, 0.0)
-            bias = tf.constant_initializer(0.)
-            running_mean = tf.constant_initializer(0.)
-            running_var = tf.ones_initializer()
-
+            batchNorm = BatchNormalization(axis=-1, name='BatchNorm', trainable=self.trainable)(imgInput)
             params = {
                 'beta': bias,
                 'gamma': weight,
@@ -76,7 +64,23 @@ class Model(object):
             print(running_mean)
             print(running_var)
             """
+            weight = tf.random_normal_initializer(mean=1, stddev=0.045)
+            bias = tf.constant_initializer(value=0)
+            moving_mean = tf.constant_initializer(value=0)
+            moving_variance = tf.ones_initializer()
+
+            batchNorm = tf.layers.batch_normalization(imgInput, center=True, scale=True,
+                                                      beta_initializer=bias,
+                                                      gamma_initializer=weight,
+                                                      moving_mean_initializer=moving_mean,
+                                                      moving_variance_initializer=moving_variance,
+                                                      training=phase_train)
+            print(weight)
+            print(bias)
+            print(moving_mean)
+            print(moving_variance)
         return batchNorm
+
 
     def basic_block(self, imgInput, nInputPlane, nOutputPlane, stride, phase_train):
 
@@ -144,9 +148,10 @@ class Model(object):
         return train_op
         """
 
-        tf.summary.scalar('loss', loss)
+        update_ops = tf.get_collection(tf.GraphKeys.UPDATE_OPS)
         optimizer = tf.contrib.opt.MomentumWOptimizer(weight_decay=0.0005, learning_rate=learning_rate, momentum=0.9, use_nesterov=True)
         train_op = optimizer.minimize(loss, global_step=global_step)
+        train_op = tf.group([train_op, update_ops])
         return train_op
 
 

@@ -26,30 +26,21 @@ class Model(object):
                 return v.transpose(2, 3, 1, 0)
             elif v.ndim == 2:
                 return v.transpose()
-            #elif v.ndim == 1:
-            #    return v.reshape((-1, 1))
             return v
 
         params = {k: v.detach().cpu().numpy() for k, v in torch.load('cifar10_input/model_d28w10.pt7')['params'].items()}
-        # for k, v in sorted(params.items()):
-        #    print(k, tuple(v.shape))
-        #print("---------------------")
-
         params_new = {}
         for k, v in sorted(params.items()):
             if 'bn' in k:
                 params_new[k] = v
                 print(k, params_new[k].shape)
-                #print(k, v.transpose().shape)
-                #print(v.transpose().shape[0])
-                # print()
             else:
                 params_new[k] = tf.constant(tr(v))
                 print(k, tf.shape(params_new[k]))
-
+        # for k, v in sorted(params.items()):
+        #    print(k, tuple(v.shape))
+        #print("---------------------")
         # params = {k: tf.constant(tr(v)) for k, v in params.items()}
-        #for k, v in sorted(params_new.items()):
-        #    print(k, type(v))
         return params_new
 
     def batch_norm(self, x, params, base, mode):
@@ -65,14 +56,20 @@ class Model(object):
         bias = tf.constant_initializer(0.)
         moving_mean = tf.constant_initializer(0.)
         moving_variance = tf.ones_initializer()
-        """
+
         params_init = {
             'beta': bias,
             'gamma': weight,
             'moving_mean': moving_mean,
             'moving_variance': moving_variance
         }
-        batchNorm = tf.contrib.layers.batch_norm(x, center=True, scale=True, param_initializers=params_init, is_training=mode)
+        """
+        batchNorm = tf.layers.batch_normalization(x, center=True, scale=True,
+                                                  beta_initializer=bias,
+                                                  gamma_initializer=weight,
+                                                  moving_mean_initializer=moving_mean,
+                                                  moving_variance_initializer = moving_variance,
+                                                  training=mode)
         return batchNorm
 
     def conv2d(self, x, params, stride=1, padding=0):
@@ -126,13 +123,11 @@ class Model(object):
         train_op = optimizer.minimize(loss, global_step=global_step)
         return train_op
         """
-        update_ops = tf.get_collection(tf.GraphKeys.UPDATE_OPS)
-        with tf.control_dependencies(update_ops):
-            # Ensures that we execute the update_ops before performing the train_step
-            tf.summary.scalar('loss', loss)
-            optimizer = tf.contrib.opt.MomentumWOptimizer(weight_decay=0.0005, learning_rate=learning_rate, momentum=0.9, use_nesterov=True)
-            train_op = optimizer.minimize(loss, global_step=global_step)
 
+        update_ops = tf.get_collection(tf.GraphKeys.UPDATE_OPS)
+        optimizer = tf.contrib.opt.MomentumWOptimizer(weight_decay=0.0005, learning_rate=learning_rate, momentum=0.9, use_nesterov=True)
+        train_op = optimizer.minimize(loss, global_step=global_step)
+        train_op = tf.group([train_op, update_ops])
         return train_op
 
 
