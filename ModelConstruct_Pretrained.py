@@ -1,6 +1,6 @@
 # from tensorflow.python.keras.layers import BatchNormalization
 from tensorflow.python.keras import backend as K
-import torch
+
 import tensorflow as tf
 import numpy as np
 from pretrianed_parameters import params_new
