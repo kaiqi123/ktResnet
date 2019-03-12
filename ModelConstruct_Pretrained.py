@@ -45,7 +45,7 @@ class Model(object):
                                                   training=mode)
         return batchNorm
 
-    """
+
     def conv2d(self, x, params, stride=1, padding=0):
         x = tf.pad(x, [[0, 0], [padding, padding], [padding, padding], [0, 0]])
         # kernel = tf.Variable(params, trainable=self.trainable, name='conv_kernel')
@@ -56,7 +56,7 @@ class Model(object):
         z = tf.nn.conv2d(x, filter=kernel, strides=[1, stride, stride, 1], padding='VALID')
         print(kernel)
         return z
-    """
+
 
     def block(self, x, params, base, mode, stride):
 
@@ -110,6 +110,7 @@ class Model(object):
         print(self.fc)
         return self
 
+    """
     def conv2d(self, imgInput, nInputPlane, nOutputPlane, stride, padding):
         with tf.name_scope('Convolution') as scope:
             imgInput = tf.pad(imgInput, [[0, 0], [padding, padding], [padding, padding], [0, 0]])
@@ -117,6 +118,7 @@ class Model(object):
             conv = tf.nn.conv2d(imgInput, filter=kernel, strides=[1, stride, stride, 1], padding='VALID', name="conv")
             print(kernel)
         return conv
+    """
 
     def FullyConnect(self, imgInput, nOutputPlane):
         with tf.name_scope('FullyConnect') as scope:
@@ -134,8 +136,8 @@ class Model(object):
         print("test teacher")
         K.set_learning_phase(True)
 
-        x = self.conv2d(input, self.num_channels, 16, stride=1, padding=1)
-        # x = self.conv2d(input, params['conv0'], padding=1)
+        # x = self.conv2d(input, self.num_channels, 16, stride=1, padding=1)
+        x = self.conv2d(input, params['conv0'], padding=1)
         o = tf.nn.relu(x)
         self.fc = self.FullyConnect(o, 10)
         self.softmax = tf.nn.softmax(self.fc)
