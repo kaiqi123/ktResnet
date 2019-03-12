@@ -82,9 +82,9 @@ class Model(object):
         return z
 
     def block(self, x, params, base, mode, stride):
-        o1 = tf.nn.relu(self.batch_norm(x, params, base + '.bn0', mode), inplace=True)
+        o1 = tf.nn.relu(self.batch_norm(x, params, base + '.bn0', mode))
         y = self.conv2d(o1, params[base + '.conv0'], stride=stride, padding=1)
-        o2 = tf.nn.relu(self.batch_norm(y, params, base + '.bn1', mode), inplace=True)
+        o2 = tf.nn.relu(self.batch_norm(y, params, base + '.bn1', mode))
         z = self.conv2d(o2, params[base + '.conv1'], stride=1, padding=1)
         if base + '.convdim' in params:
             return z + self.conv2d(o1, params[base + '.convdim'], stride=stride)
