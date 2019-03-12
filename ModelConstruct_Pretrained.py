@@ -21,19 +21,13 @@ class Model(object):
         weight = tf.constant_initializer(params[base + '.weight'])
         moving_mean = tf.constant_initializer(params[base + '.running_mean'])
         moving_variance = tf.constant_initializer(params[base + '.running_var'])
-        """
-        weight = tf.random_normal_initializer(1.0, 0.0)
-        bias = tf.constant_initializer(0.)
-        moving_mean = tf.constant_initializer(0.)
-        moving_variance = tf.ones_initializer()
 
-        params_init = {
-            'beta': bias,
-            'gamma': weight,
-            'moving_mean': moving_mean,
-            'moving_variance': moving_variance
-        }
-        """
+        batchNorm = BatchNormalization(axis=-1, name='BatchNorm', trainable=self.trainable,
+                                       beta_initializer=bias,
+                                       gamma_initializer=weight,
+                                       moving_mean_initializer=moving_mean,
+                                       moving_variance_initializer=moving_variance)(imgInput)
+
         batchNorm = tf.layers.batch_normalization(x, center=True, scale=True,
                                                   beta_initializer=bias,
                                                   gamma_initializer=weight,

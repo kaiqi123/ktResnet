@@ -50,7 +50,12 @@ class Model(object):
         with tf.name_scope('bn') as scope:
 
             """
-            batchNorm = BatchNormalization(axis=-1, name='BatchNorm', trainable=self.trainable)(imgInput)
+            batchNorm = BatchNormalization(axis=-1, name='BatchNorm', trainable=self.trainable,
+                                           beta_initializer=bias,
+                                           gamma_initializer=weight,
+                                           moving_mean_initializer=moving_mean,
+                                           moving_variance_initializer=moving_variance)(imgInput)
+
             params = {
                 'beta': bias,
                 'gamma': weight,
@@ -59,10 +64,6 @@ class Model(object):
             }
             batchNorm = tf.contrib.layers.batch_norm(imgInput, center=True, scale=True, param_initializers=params, is_training=phase_train, scope=scope)
 
-            print(weight)
-            print(bias)
-            print(running_mean)
-            print(running_var)
             """
             weight = tf.random_normal_initializer(mean=1, stddev=0.045)
             bias = tf.constant_initializer(value=0)
@@ -74,7 +75,8 @@ class Model(object):
                                                       gamma_initializer=weight,
                                                       moving_mean_initializer=moving_mean,
                                                       moving_variance_initializer=moving_variance,
-                                                      trainable=self.trainable)
+                                                      training=phase_train, trainable=self.trainable)
+
             print(weight)
             print(bias)
             print(moving_mean)
@@ -138,10 +140,10 @@ class Model(object):
 
     def training(self, loss, learning_rate, global_step):
 
-        # update_ops = tf.get_collection(tf.GraphKeys.UPDATE_OPS)
+        update_ops = tf.get_collection(tf.GraphKeys.UPDATE_OPS)
         optimizer = tf.contrib.opt.MomentumWOptimizer(weight_decay=0.0005, learning_rate=learning_rate, momentum=0.9, use_nesterov=True)
         train_op = optimizer.minimize(loss, global_step=global_step)
-        # train_op = tf.group([train_op, update_ops])
+        train_op = tf.group([train_op, update_ops])
         return train_op
 
 
