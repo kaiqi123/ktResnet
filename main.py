@@ -198,7 +198,7 @@ class Resnet(object):
             print(device_lib.list_local_devices())
 
             # This line allows the code to use only sufficient memory and does not block entire GPU
-            config = tf.ConfigProto(gpu_options=tf.GPUOptions(allow_growth=True))
+            #config = tf.ConfigProto(gpu_options=tf.GPUOptions(allow_growth=True))
 
             # set the seed so that we have same loss values and initializations for every run.
             tf.set_random_seed(SEED)
@@ -216,6 +216,7 @@ class Resnet(object):
                                                 shape=(FLAGS.batch_size))
 
             config = tf.ConfigProto()
+            config.gpu_options.allow_growth = True
             config.gpu_options.allocator_type = 'BFC'
 
             sess = tf.Session(config=config)
