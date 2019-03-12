@@ -53,19 +53,10 @@ class Model(object):
 
     def block(self, x, params, base, mode, stride):
 
-        """
+
         o1 = tf.nn.relu(self.batch_norm(x, params, base + '.bn0', mode))
         y = self.conv2d(o1, params[base + '.conv0'], stride=stride, padding=1)
         o2 = tf.nn.relu(self.batch_norm(y, params, base + '.bn1', mode))
-        z = self.conv2d(o2, params[base + '.conv1'], stride=1, padding=1)
-        if base + '.convdim' in params:
-            return z + self.conv2d(o1, params[base + '.convdim'], stride=stride)
-        else:
-            return z + x
-        """
-        o1 = tf.nn.relu(x)
-        y = self.conv2d(o1, params[base + '.conv0'], stride=stride, padding=1)
-        o2 = tf.nn.relu(y)
         z = self.conv2d(o2, params[base + '.conv1'], stride=1, padding=1)
         if base + '.convdim' in params:
             return z + self.conv2d(o1, params[base + '.convdim'], stride=stride)
@@ -87,8 +78,7 @@ class Model(object):
         g1 = self.group(g0, params, 'group1', mode, 2, n)
         g2 = self.group(g1, params, 'group2', mode, 2, n)
 
-        #o = tf.nn.relu(self.batch_norm(g2, params, 'bn', mode))
-        o = tf.nn.relu(g2)
+        o = tf.nn.relu(self.batch_norm(g2, params, 'bn', mode))
         o = tf.nn.avg_pool(o, ksize=[1, 8, 8, 1], strides=[1, 1, 1, 1], padding='VALID')
         shape = int(np.prod(o.get_shape()[1:]))
         o = tf.reshape(o, [-1, shape])
@@ -114,10 +104,10 @@ class Model(object):
         return train_op
         """
 
-        # update_ops = tf.get_collection(tf.GraphKeys.UPDATE_OPS)
+        update_ops = tf.get_collection(tf.GraphKeys.UPDATE_OPS)
         optimizer = tf.contrib.opt.MomentumWOptimizer(weight_decay=0.0005, learning_rate=learning_rate, momentum=0.9, use_nesterov=True)
         train_op = optimizer.minimize(loss, global_step=global_step)
-        # train_op = tf.group([train_op, update_ops])
+        train_op = tf.group([train_op, update_ops])
         return train_op
 
 
