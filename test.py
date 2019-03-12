@@ -16,7 +16,7 @@ sess = tf.Session()
 #x = tf.get_variable('x', shape=[2, 4], initializer=a)
 #x = tf.get_variable('x', initializer=a)
 #x.initializer.run()
-
+tf.ones_initializer()
 x = sess.run(a)
 print(x)
 

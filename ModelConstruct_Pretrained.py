@@ -26,8 +26,8 @@ class Model(object):
                 return v.transpose(2, 3, 1, 0)
             elif v.ndim == 2:
                 return v.transpose()
-            elif v.ndim == 1:
-                return v.reshape((-1, 1))
+            #elif v.ndim == 1:
+            #    return v.reshape((-1, 1))
             return v
 
         params = {k: v.detach().cpu().numpy() for k, v in torch.load('cifar10_input/model_d28w10.pt7')['params'].items()}
@@ -38,7 +38,7 @@ class Model(object):
         params_new = {}
         for k, v in sorted(params.items()):
             if 'bn' in k:
-                params_new[k] = tr(v)
+                params_new[k] = v
                 print(k, params_new[k].shape)
                 #print(k, v.transpose().shape)
                 #print(v.transpose().shape[0])
@@ -50,15 +50,22 @@ class Model(object):
         # params = {k: tf.constant(tr(v)) for k, v in params.items()}
         #for k, v in sorted(params_new.items()):
         #    print(k, type(v))
-        return params
+        return params_new
 
     def batch_norm(self, x, params, base, mode):
 
         #batchNorm = BatchNormalization(axis=-1, name='BatchNorm', trainable=self.trainable)(imgInput)
+
         bias = tf.constant_initializer(params[base + '.bias'])
         weight = tf.constant_initializer(params[base + '.weight'])
         moving_mean = tf.constant_initializer(params[base + '.running_mean'])
         moving_variance = tf.constant_initializer(params[base + '.running_var'])
+        """
+        weight = tf.random_normal_initializer(1.0, 0.0)
+        bias = tf.constant_initializer(0.)
+        moving_mean = tf.constant_initializer(0.)
+        moving_variance = tf.ones_initializer()
+        """
         params_init = {
             'beta': bias,
             'gamma': weight,
