@@ -141,14 +141,14 @@ class Resnet(object):
 
             for i in range(NUM_ITERATIONS):
 
-                # print("iteration: "+str(i))
+                print("iteration: "+str(i))
 
                 feed_dict, images_feed, labels_feed = self.fill_feed_dict(data_input_train, images_placeholder,
                                                                           labels_placeholder, sess, 'Train',
                                                                           phase_train)
 
                 if FLAGS.teacher or FLAGS.student:
-                    # print("train function: independent student or teacher")
+                    print("train function: independent student or teacher")
                     _, loss_value = sess.run([self.train_op, self.loss], feed_dict=feed_dict)
 
                     if i % 10 == 0:
