@@ -13,8 +13,6 @@ class Model(object):
         self.seed = seed
         self.fc = None
         self.softmax = None
-        #self.phase_train = phase_train
-        #self.params = self.read_parameters()
 
     def batch_norm(self, x, params, base, mode):
 
@@ -48,11 +46,11 @@ class Model(object):
 
     def conv2d(self, x, params, stride=1, padding=0):
         x = tf.pad(x, [[0, 0], [padding, padding], [padding, padding], [0, 0]])
-        # kernel = tf.Variable(params, trainable=self.trainable, name='conv_kernel')
-        size = params.shape[0]
-        nInputPlane = params.shape[2]
-        nOutputPlane = params.shape[3]
-        kernel = tf.Variable(tf.truncated_normal([size, size, nInputPlane, nOutputPlane], dtype=tf.float32, stddev=1e-2, seed=self.seed),trainable=self.trainable, name='conv_kernel')
+        kernel = tf.Variable(params, trainable=self.trainable, name='conv_kernel')
+        # size = params.shape[0]
+        # nInputPlane = params.shape[2]
+        # nOutputPlane = params.shape[3]
+        # kernel = tf.Variable(tf.truncated_normal([size, size, nInputPlane, nOutputPlane], dtype=tf.float32, stddev=1e-2, seed=self.seed),trainable=self.trainable, name='conv_kernel')
         z = tf.nn.conv2d(x, filter=kernel, strides=[1, stride, stride, 1], padding='VALID')
         print(kernel)
         return z
@@ -89,7 +87,6 @@ class Model(object):
     def build_teacher_model(self, input, n, mode):
 
         K.set_learning_phase(True)
-        params = self.params
         x = self.conv2d(input, params['conv0'], padding=1)
         g0 = self.group(x, params, 'group0', mode, 1, n)
         g1 = self.group(g0, params, 'group1', mode, 2, n)
@@ -109,40 +106,6 @@ class Model(object):
         print(g2)
         print(self.fc)
         return self
-
-    """
-    def conv2d(self, imgInput, nInputPlane, nOutputPlane, stride, padding):
-        with tf.name_scope('Convolution') as scope:
-            imgInput = tf.pad(imgInput, [[0, 0], [padding, padding], [padding, padding], [0, 0]])
-            kernel = tf.Variable(tf.truncated_normal([3, 3, nInputPlane, nOutputPlane], dtype=tf.float32, stddev=1e-2, seed=self.seed), trainable=self.trainable, name='conv_kernel')
-            conv = tf.nn.conv2d(imgInput, filter=kernel, strides=[1, stride, stride, 1], padding='VALID', name="conv")
-            print(kernel)
-        return conv
-    """
-
-    def FullyConnect(self, imgInput, nOutputPlane):
-        with tf.name_scope('FullyConnect') as scope:
-            shape = int(np.prod(imgInput.get_shape()[1:]))
-            fcw = tf.Variable(tf.truncated_normal([shape, nOutputPlane], dtype=tf.float32, stddev=1e-2, seed=self.seed), trainable=self.trainable, name='weights')
-            fcb = tf.Variable(tf.constant(0.0, shape=[nOutputPlane], dtype=tf.float32), trainable=self.trainable, name='biases')
-            flat = tf.reshape(imgInput, [-1, shape])
-            imgOutput = tf.nn.bias_add(tf.matmul(flat, fcw), fcb)
-            print(fcw)
-            print(fcb)
-        return imgOutput
-
-    def test(self, input, n, mode):
-
-        print("test teacher")
-        K.set_learning_phase(True)
-
-        # x = self.conv2d(input, self.num_channels, 16, stride=1, padding=1)
-        x = self.conv2d(input, params['conv0'], padding=1)
-        o = tf.nn.relu(x)
-        self.fc = self.FullyConnect(o, 10)
-        self.softmax = tf.nn.softmax(self.fc)
-        return self
-
 
     def loss(self, labels):
         cross_entropy = tf.nn.sparse_softmax_cross_entropy_with_logits(labels=labels, logits=self.fc, name='crossEntropy')

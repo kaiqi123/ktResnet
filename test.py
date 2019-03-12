@@ -90,3 +90,15 @@ y_tf = sess.run(out, feed_dict={inputs_tf: inputs.permute(0, 2, 3, 1).numpy()})
 
 # check that difference between PyTorch and Tensorflow is small
 assert np.abs(y_tf - y.data.numpy()).max() < 1e-5
+
+
+def test(self, input, n, mode):
+    print("test teacher")
+    K.set_learning_phase(True)
+
+    # x = self.conv2d(input, self.num_channels, 16, stride=1, padding=1)
+    x = self.conv2d(input, params['conv0'], padding=1)
+    o = tf.nn.relu(x)
+    self.fc = self.FullyConnect(o, 10)
+    self.softmax = tf.nn.softmax(self.fc)
+    return self
