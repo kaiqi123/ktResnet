@@ -75,7 +75,7 @@ class Resnet(object):
 
             true_count = 0
             for step in xrange(steps_per_epoch):
-                feed_dict, images_feed, labels_feed = self.fill_feed_dict(dataset, images_placeholder, labels_placeholder, sess, mode,phase_train)
+                feed_dict, images_feed, labels_feed = self.fill_feed_dict(dataset, images_placeholder, labels_placeholder, sess, mode, phase_train)
                 count = sess.run(eval_correct, feed_dict=feed_dict)
                 true_count = true_count + count
 
@@ -213,9 +213,6 @@ class Resnet(object):
 
             if FLAGS.teacher:
                 lr = self.define_teacher(images_placeholder, labels_placeholder, global_step, sess, SEED, phase_train)
-
-            elif FLAGS.student:
-                self.define_independent_student(images_placeholder, labels_placeholder, global_step, sess, SEED)
 
             self.train_model(lr, data_input_train, data_input_test, images_placeholder, labels_placeholder, sess, phase_train)
 
