@@ -126,6 +126,7 @@ class Model(object):
     def training(self, loss, learning_rate, global_step):
 
         print(self.batch_norm())
+        print(self.batch_norm().updates)
         update_ops = tf.get_collection(self.batch_norm().updates)
         optimizer = tf.contrib.opt.MomentumWOptimizer(weight_decay=0.0005, learning_rate=learning_rate, momentum=0.9, use_nesterov=True)
         train_op = optimizer.minimize(loss, global_step=global_step)
