@@ -55,11 +55,12 @@ class Model(object):
             moving_mean = tf.constant_initializer(value=0)
             moving_variance = tf.ones_initializer()
 
-            bn = BatchNormalization(axis=-1, name='BatchNorm', trainable=self.trainable,
-                                           beta_initializer=bias,
-                                           gamma_initializer=weight,
-                                           moving_mean_initializer=moving_mean,
-                                           moving_variance_initializer=moving_variance)
+            bn = BatchNormalization(axis=-1, name='BatchNorm', trainable=self.trainable)
+            #bn = BatchNormalization(axis=-1, name='BatchNorm', trainable=self.trainable,
+            #                               beta_initializer=bias,
+            #                               gamma_initializer=weight,
+            #                               moving_mean_initializer=moving_mean,
+            #                               moving_variance_initializer=moving_variance)
 
             print(weight)
             print(bias)
