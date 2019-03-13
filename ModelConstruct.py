@@ -112,7 +112,7 @@ class Model(object):
         g1 = self.group(g0, nStages[1], nStages[2], n, 2, mode)
         g2 = self.group(g1, nStages[2], nStages[3], n, 2, mode)
 
-        relu = tf.nn.relu(self.bn(g2, training=mode), name='relu')
+        relu = tf.nn.relu(self.batch_norm()(g2, training=mode), name='relu')
         averagePool = tf.nn.avg_pool(relu, ksize=[1, 8, 8, 1], strides=[1, 1, 1, 1], padding='VALID', name='averagePool')
         self.fc = self.FullyConnect(averagePool, num_classes)
         self.softmax = tf.nn.softmax(self.fc)
@@ -125,7 +125,7 @@ class Model(object):
 
     def training(self, loss, learning_rate, global_step):
 
-        update_ops = tf.get_collection(self.bn.updates)
+        update_ops = tf.get_collection(self.batch_norm().updates)
         optimizer = tf.contrib.opt.MomentumWOptimizer(weight_decay=0.0005, learning_rate=learning_rate, momentum=0.9, use_nesterov=True)
         train_op = optimizer.minimize(loss, global_step=global_step)
         train_op = tf.group([train_op, update_ops])
