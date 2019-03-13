@@ -18,23 +18,27 @@ def test(phase_train):
     #K.set_learning_phase(phase_train)
 
     x = tf.zeros(shape=(2, 3), dtype=tf.float32)
-
     bn = tf.keras.layers.BatchNormalization(axis=-1, trainable=True)
     norm = bn(x, training=phase_train)
-    y = tf.keras.layers.Dense(4)(norm)
+    norm2 = bn(norm, training=phase_train)
+    y = tf.keras.layers.Dense(4)(norm2)
 
     print('variables: %d' % len(tf.get_collection(tf.GraphKeys.GLOBAL_VARIABLES)))
-    print(tf.get_collection(tf.GraphKeys.GLOBAL_VARIABLES))
+    for e in tf.get_collection(tf.GraphKeys.GLOBAL_VARIABLES):
+        print(e)
 
     print('trainable variables: %d' % len(tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES)))
-    print(tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES))
+    for e in tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES):
+        print(e)
 
     update_ops = tf.get_collection(tf.GraphKeys.UPDATE_OPS)
     print('n_update_ops: %d' % len(update_ops))
-    print(update_ops)
+    #print(update_ops)
 
     print('n_update_ops(bn): %d' % len(bn.updates))
     print(bn.updates)
+    #for e in bn.updates:
+    #    print(e)
 
     print("----------------------")
 
