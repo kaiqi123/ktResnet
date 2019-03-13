@@ -104,12 +104,13 @@ class Model(object):
 
         mode = tf.cond(tf.equal(phase_train, True), lambda: True, lambda: False)
         print(mode)
-        if mode:
-            K.clear_session()
-            K.set_learning_phase(1)
-        else:
-            K.clear_session()
-            K.set_learning_phase(0)
+
+        #if mode:
+        #    K.clear_session()
+        #    K.set_learning_phase(1)
+        #else:
+        #    K.clear_session()
+        #    K.set_learning_phase(0)
 
         nStages = [16, 16 * k, 32 * k, 64 * k]
 
