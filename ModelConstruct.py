@@ -17,7 +17,7 @@ class Model(object):
         self.seed = seed
         self.fc = None
         self.softmax = None
-        self.bn = self.batch_norm()
+        #self.bn = self.batch_norm()
 
     def conv2d(self, imgInput, nInputPlane, nOutputPlane, stride, padding):
         with tf.name_scope('Convolution') as scope:
@@ -74,12 +74,12 @@ class Model(object):
         print("basic_block")
 
         with tf.name_scope('block_conv1') as scope:
-            o1 = tf.nn.relu(self.bn(imgInput, training=mode), name='relu')
+            o1 = tf.nn.relu(self.batch_norm()(imgInput, training=mode), name='relu')
             y = self.conv2d(o1, nInputPlane, nOutputPlane, stride=stride, padding=1)
             print(y)
 
         with tf.name_scope('block_conv2') as scope:
-            o2 = tf.nn.relu(self.bn(y, training=mode), name='relu')
+            o2 = tf.nn.relu(self.batch_norm()(y, training=mode), name='relu')
             # dropout = tf.nn.dropout(relu, 0.3, seed=self.seed)
             z = self.conv2d(o2, nOutputPlane, nOutputPlane, stride=1, padding=1)
             #print(z)
@@ -112,7 +112,7 @@ class Model(object):
         g1 = self.group(g0, nStages[1], nStages[2], n, 2, mode)
         g2 = self.group(g1, nStages[2], nStages[3], n, 2, mode)
 
-        relu = tf.nn.relu(self.bn(g2, training=mode), name='relu')
+        relu = tf.nn.relu(self.batch_norm()(g2, training=mode), name='relu')
         averagePool = tf.nn.avg_pool(relu, ksize=[1, 8, 8, 1], strides=[1, 1, 1, 1], padding='VALID', name='averagePool')
         self.fc = self.FullyConnect(averagePool, num_classes)
         self.softmax = tf.nn.softmax(self.fc)
@@ -125,7 +125,7 @@ class Model(object):
 
     def training(self, loss, learning_rate, global_step):
 
-        update_ops = tf.get_collection(self.bn.updates)
+        update_ops = tf.get_collection(self.batch_norm().updates)
         optimizer = tf.contrib.opt.MomentumWOptimizer(weight_decay=0.0005, learning_rate=learning_rate, momentum=0.9, use_nesterov=True)
         train_op = optimizer.minimize(loss, global_step=global_step)
         train_op = tf.group([train_op, update_ops])
@@ -142,7 +142,7 @@ class Model(object):
         print('n_update_ops: %d' % len(update_ops))
         # print(update_ops)
 
-        print('n_update_ops(bn): %d' % len(self.bn.updates))
+        print('n_update_ops(bn): %d' % len(self.batch_norm().updates))
         #print(self.bn.updates)
         # for e in bn.updates:
         #    print(e)
