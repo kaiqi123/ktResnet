@@ -18,7 +18,6 @@ class Model(object):
         self.fc = None
         self.softmax = None
         self.bn = self.batch_norm()
-        #self.phase_train = phase_train
 
     def conv2d(self, imgInput, nInputPlane, nOutputPlane, stride, padding):
         with tf.name_scope('Convolution') as scope:
@@ -69,17 +68,17 @@ class Model(object):
         return bn
 
 
-    def basic_block(self, imgInput, nInputPlane, nOutputPlane, stride, phase_train):
+    def basic_block(self, imgInput, nInputPlane, nOutputPlane, stride, mode):
 
         print("basic_block")
 
         with tf.name_scope('block_conv1') as scope:
-            o1 = tf.nn.relu(self.bn(imgInput, training=phase_train), name='relu')
+            o1 = tf.nn.relu(self.bn(imgInput, training=mode), name='relu')
             y = self.conv2d(o1, nInputPlane, nOutputPlane, stride=stride, padding=1)
             #print(y)
 
         with tf.name_scope('block_conv2') as scope:
-            o2 = tf.nn.relu(self.bn(y, training=phase_train), name='relu')
+            o2 = tf.nn.relu(self.bn(y, training=mode), name='relu')
             # dropout = tf.nn.dropout(relu, 0.3, seed=self.seed)
             z = self.conv2d(o2, nOutputPlane, nOutputPlane, stride=1, padding=1)
             #print(z)
@@ -92,19 +91,20 @@ class Model(object):
 
         return output
 
-    def group(self, imgInput, nInputPlane, nOutputPlane, n, stride, phase_train):
+    def group(self, imgInput, nInputPlane, nOutputPlane, n, stride, mode):
         print("group")
         with tf.name_scope('group1') as scope:
-            block = self.basic_block(imgInput, nInputPlane, nOutputPlane, stride, phase_train)
+            block = self.basic_block(imgInput, nInputPlane, nOutputPlane, stride, mode)
             for i in range(n - 1):
                 x = block
-                block = self.basic_block(x, nOutputPlane, nOutputPlane, 1, phase_train)
+                block = self.basic_block(x, nOutputPlane, nOutputPlane, 1, mode)
         return block
 
     def build_teacher_model(self, rgb, num_classes, k, n, phase_train):
 
-
-        if phase_train:
+        mode = tf.cond(tf.equal(phase_train, True), lambda: True, lambda: False)
+        print(mode)
+        if mode:
             K.clear_session()
             K.set_learning_phase(1)
         else:
@@ -114,11 +114,11 @@ class Model(object):
         nStages = [16, 16 * k, 32 * k, 64 * k]
 
         x = self.conv2d(rgb, self.num_channels, nStages[0], stride=1, padding=1)
-        g0 = self.group(x, nStages[0], nStages[1], n, 1, phase_train)
-        g1 = self.group(g0, nStages[1], nStages[2], n, 2, phase_train)
-        g2 = self.group(g1, nStages[2], nStages[3], n, 2, phase_train)
+        g0 = self.group(x, nStages[0], nStages[1], n, 1, mode)
+        g1 = self.group(g0, nStages[1], nStages[2], n, 2, mode)
+        g2 = self.group(g1, nStages[2], nStages[3], n, 2, mode)
 
-        relu = tf.nn.relu(self.bn(g2, training=phase_train), name='relu')
+        relu = tf.nn.relu(self.bn(g2, training=mode), name='relu')
         averagePool = tf.nn.avg_pool(relu, ksize=[1, 8, 8, 1], strides=[1, 1, 1, 1], padding='VALID', name='averagePool')
         self.fc = self.FullyConnect(averagePool, num_classes)
         self.softmax = tf.nn.softmax(self.fc)
