@@ -100,17 +100,9 @@ class Model(object):
                 block = self.basic_block(x, nOutputPlane, nOutputPlane, 1, mode)
         return block
 
-    def build_teacher_model(self, rgb, num_classes, k, n, phase_train):
+    def build_teacher_model(self, rgb, num_classes, k, n, mode):
 
-        mode = tf.cond(tf.equal(phase_train, True), lambda: True, lambda: False)
-        print(mode)
-
-        #if mode:
-        #    K.clear_session()
-        #    K.set_learning_phase(1)
-        #else:
-        #    K.clear_session()
-        #    K.set_learning_phase(0)
+        K.clear_session()
 
         nStages = [16, 16 * k, 32 * k, 64 * k]
 
