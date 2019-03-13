@@ -131,16 +131,16 @@ class Model(object):
         train_op = tf.group([train_op, update_ops])
 
         print('variables: %d' % len(tf.get_collection(tf.GraphKeys.GLOBAL_VARIABLES)))
-        print(tf.get_collection(tf.GraphKeys.GLOBAL_VARIABLES))
+        #print(tf.get_collection(tf.GraphKeys.GLOBAL_VARIABLES))
 
         print('trainable variables: %d' % len(tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES)))
-        print(tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES))
+        #print(tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES))
 
         update_ops = tf.get_collection(tf.GraphKeys.UPDATE_OPS)
         print('n_update_ops: %d' % len(update_ops))
 
         print('n_update_ops(bn): %d' % len(self.batch_norm().updates))
-        print(self.batch_norm().updates)
+        #print(self.batch_norm().updates)
 
         return train_op
 
