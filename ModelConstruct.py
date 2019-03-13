@@ -75,7 +75,7 @@ class Model(object):
         with tf.name_scope('block_conv1') as scope:
             o1 = tf.nn.relu(self.bn(imgInput, training=mode), name='relu')
             y = self.conv2d(o1, nInputPlane, nOutputPlane, stride=stride, padding=1)
-            #print(y)
+            print(y)
 
         with tf.name_scope('block_conv2') as scope:
             o2 = tf.nn.relu(self.bn(y, training=mode), name='relu')
