@@ -14,7 +14,7 @@ def test(phase_train):
     #    K.clear_session()
     #    K.set_learning_phase(0)
 
-    K.clear_session()
+    #K.clear_session()
     #K.set_learning_phase(phase_train)
 
     x = tf.zeros(shape=(2, 3), dtype=tf.float32)

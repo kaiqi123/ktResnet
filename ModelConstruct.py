@@ -102,7 +102,7 @@ class Model(object):
 
     def build_teacher_model(self, rgb, num_classes, k, n, mode):
 
-        K.clear_session()
+        # K.clear_session()
 
         nStages = [16, 16 * k, 32 * k, 64 * k]
 
