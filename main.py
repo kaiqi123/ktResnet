@@ -130,7 +130,7 @@ class Resnet(object):
                 if FLAGS.teacher or FLAGS.student:
                     # print("train function: independent student or teacher")
                     _, _, loss_value, train_count_per_batch = sess.run([self.train_op, self.update_ops, self.loss, eval_correct], feed_dict=feed_dict)
-                    train_acc = train_count_per_batch // FLAGS.batch_size
+                    train_acc = float(train_count_per_batch) / FLAGS.batch_size
                     print(train_count_per_batch,FLAGS.batch_size, train_acc)
                     Train_accuracy_List.append(train_acc)
 
