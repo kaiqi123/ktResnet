@@ -119,6 +119,7 @@ class Resnet(object):
 
             eval_correct = self.evaluation(self.softmax, labels_placeholder)
 
+            train_count = 0
             for i in range(NUM_ITERATIONS):
 
                 # print("iteration: "+str(i))
@@ -130,9 +131,8 @@ class Resnet(object):
                 if FLAGS.teacher or FLAGS.student:
                     # print("train function: independent student or teacher")
                     _, _, loss_value, train_count_per_batch = sess.run([self.train_op, self.update_ops, self.loss, eval_correct], feed_dict=feed_dict)
-                    train_acc = float(train_count_per_batch) / FLAGS.batch_size
-                    print(train_count_per_batch,FLAGS.batch_size, train_acc)
-                    Train_accuracy_List.append(train_acc)
+                    train_count = train_count + train_count_per_batch
+                    #print(train_count_per_batch,FLAGS.batch_size, train_acc)
 
                     if i % 10 == 0:
                         print ('Step %d: loss_value = %.20f' % (i, loss_value))
@@ -144,6 +144,11 @@ class Resnet(object):
                     print ('Decayed learning rate list: ' + str(DecayedLearningRate_List))
 
                     print ("Training Data Eval:")
+                    steps_per_epoch = FLAGS.num_training_examples // FLAGS.batch_size
+                    num_examples = steps_per_epoch * FLAGS.batch_size
+                    train_acc = float(train_count) / num_examples
+                    Train_accuracy_List.append(train_acc)
+                    train_count = 0
                     #train_acc = self.do_eval(sess, eval_correct, self.softmax, images_placeholder, labels_placeholder, data_input_train,'Train', phase_train)
                     #Train_accuracy_List.append(train_acc)
                     print(Train_accuracy_List)
