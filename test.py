@@ -26,9 +26,10 @@ def test(phase_train):
             moving_mean = tf.constant_initializer(value=0)
             moving_variance = tf.ones_initializer()
 
-            #bn = BatchNormalization(axis=-1, name='BatchNorm', trainable=self.trainable)
+            #bn = tf.keras.layers.BatchNormalization(axis=-1, name='BatchNorm', trainable=self.trainable)
+
             """
-            bn = tf.keras.layers.BatchNormalization(axis=-1, name='BatchNorm', trainable=True,
+            bn = tf.layers.batch_normalization(axis=-1, name='BatchNorm', trainable=True,
                                            beta_initializer=bias,
                                            gamma_initializer=weight,
                                            moving_mean_initializer=moving_mean,
@@ -72,10 +73,11 @@ def test(phase_train):
     update_ops = tf.get_collection(tf.GraphKeys.UPDATE_OPS)
     print('n_update_ops: %d' % len(update_ops))
     #print(update_ops)
-    for key in update_ops:
-        print(key)
-    i2t_update_extra_ops = [elem for elem in update_ops if 'text_feature/attention' not in elem.name]
-    print(i2t_update_extra_ops)
+    for elem in update_ops:
+        print(elem.name)
+
+    #i2t_update_extra_ops = [elem for elem in update_ops if 'text_feature/attention' not in elem.name]
+    #print(i2t_update_extra_ops)
 
     """
     update_ops1 = tf.get_collection(bn1.updates)

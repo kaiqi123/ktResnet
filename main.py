@@ -104,7 +104,7 @@ class Resnet(object):
         #lr = tf.convert_to_tensor(FLAGS.learning_rate, dtype=tf.float32)
         #print("learning_rate is(not decay): ", lr)
 
-        self.train_op = mentor.training(self.loss, lr, global_step)
+        self.train_op, self.update_ops = mentor.training(self.loss, lr, global_step)
         self.softmax = mentor_data_dict.softmax
 
         init = tf.global_variables_initializer()
@@ -129,7 +129,8 @@ class Resnet(object):
 
                 if FLAGS.teacher or FLAGS.student:
                     # print("train function: independent student or teacher")
-                    _, loss_value = sess.run([self.train_op, self.loss], feed_dict=feed_dict)
+                    _, _, loss_value, train_acc = sess.run([self.train_op, self.update_ops, self.loss, eval_correct], feed_dict=feed_dict)
+                    Train_accuracy_List.append(train_acc)
 
                     if i % 10 == 0:
                         print ('Step %d: loss_value = %.20f' % (i, loss_value))
@@ -141,8 +142,8 @@ class Resnet(object):
                     print ('Decayed learning rate list: ' + str(DecayedLearningRate_List))
 
                     print ("Training Data Eval:")
-                    train_acc = self.do_eval(sess, eval_correct, self.softmax, images_placeholder, labels_placeholder, data_input_train,'Train', phase_train)
-                    Train_accuracy_List.append(train_acc)
+                    #train_acc = self.do_eval(sess, eval_correct, self.softmax, images_placeholder, labels_placeholder, data_input_train,'Train', phase_train)
+                    #Train_accuracy_List.append(train_acc)
                     print(Train_accuracy_List)
                     print ("max train accuracy % f", max(Train_accuracy_List))
 
