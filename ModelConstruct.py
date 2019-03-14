@@ -142,6 +142,7 @@ class Model(object):
         train_op = optimizer.minimize(loss, global_step=global_step)
         #train_op = tf.group([train_op, update_ops])
 
+        """
         print('variables: %d' % len(tf.get_collection(tf.GraphKeys.GLOBAL_VARIABLES)))
         for e in tf.get_collection(tf.GraphKeys.GLOBAL_VARIABLES):
             print(e)
@@ -158,6 +159,7 @@ class Model(object):
         #print(self.bn.updates)
         # for e in bn.updates:
         #    print(e)
+        """
 
         return train_op,update_ops
 
