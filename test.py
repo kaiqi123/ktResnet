@@ -17,12 +17,49 @@ def test(phase_train):
     #K.clear_session()
     #K.set_learning_phase(phase_train)
 
+    def batch_norm(x, phase_train):
+
+        with tf.name_scope('bn') as scope:
+
+            weight = tf.random_normal_initializer(mean=1, stddev=0.045)
+            bias = tf.constant_initializer(value=0)
+            moving_mean = tf.constant_initializer(value=0)
+            moving_variance = tf.ones_initializer()
+
+            #bn = BatchNormalization(axis=-1, name='BatchNorm', trainable=self.trainable)
+            """
+            bn = tf.keras.layers.BatchNormalization(axis=-1, name='BatchNorm', trainable=True,
+                                           beta_initializer=bias,
+                                           gamma_initializer=weight,
+                                           moving_mean_initializer=moving_mean,
+                                           moving_variance_initializer=moving_variance)
+            """
+
+            bn = tf.contrib.layers.batch_norm(x, trainable=True, is_training=phase_train,
+                                           updates_collections=tf.GraphKeys.UPDATE_OPS)
+
+            print(weight)
+            print(bias)
+            print(moving_mean)
+            print(moving_variance)
+        return bn
+
+    """
+    x = tf.zeros(shape=(2, 3), dtype=tf.float32)
+    #bn = tf.keras.layers.BatchNormalization(axis=-1, trainable=True)
+    y1 = tf.keras.layers.Dense(6)(x)
+    bn1 = batch_norm()
+    norm = bn1(y1, training=phase_train)
+    y = tf.keras.layers.Dense(4)(norm)
+    bn2 = batch_norm()
+    norm2 = bn2(y, training=phase_train)
+    """
 
     x = tf.zeros(shape=(2, 3), dtype=tf.float32)
-    bn = tf.keras.layers.BatchNormalization(axis=-1, trainable=True)
-    norm = bn(x, training=phase_train)
-    norm2 = bn(norm, training=phase_train)
-    y = tf.keras.layers.Dense(4)(norm2)
+    y1 = tf.keras.layers.Dense(6)(x)
+    norm = batch_norm(y1, phase_train)
+    y = tf.keras.layers.Dense(4)(norm)
+    norm2 = batch_norm(y, phase_train)
 
     print('variables: %d' % len(tf.get_collection(tf.GraphKeys.GLOBAL_VARIABLES)))
     for e in tf.get_collection(tf.GraphKeys.GLOBAL_VARIABLES):
@@ -35,11 +72,33 @@ def test(phase_train):
     update_ops = tf.get_collection(tf.GraphKeys.UPDATE_OPS)
     print('n_update_ops: %d' % len(update_ops))
     #print(update_ops)
+    for key in update_ops:
+        print(key)
+    i2t_update_extra_ops = [elem for elem in update_ops if 'text_feature/attention' not in elem.name]
+    print(i2t_update_extra_ops)
 
-    print('n_update_ops(bn): %d' % len(bn.updates))
-    print(bn.updates)
+    """
+    update_ops1 = tf.get_collection(bn1.updates)
+    print('n_update_ops(bn): %d' % len(update_ops1))
+    print(update_ops1)
     #for e in bn.updates:
     #    print(e)
+
+
+    update_ops2 = tf.get_collection(bn2.updates)
+    print('n_update_ops(bn): %d' % len(update_ops1))
+    print(update_ops2)
+    #for e in bn.updates:
+    #    print(e)
+
+    update_ops3 = [tf.get_collection(bn1.updates),
+                    tf.get_collection(bn2.updates)]
+
+    print('n_update_ops(bn): %d' % len(update_ops3))
+    print(update_ops3)
+    #for e in bn.updates:
+    #    print(e)
+    """
 
     print("----------------------")
 
