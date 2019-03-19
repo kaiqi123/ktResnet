@@ -52,6 +52,17 @@ class Resnet(object):
                    (mode, num_examples, true_count, precision))
             return precision
 
+    def _build_models(self, modelName):
+        with tf.variable_scope(modelName, use_resource=False):
+            m = Model(FLAGS.num_channels, SEED)
+            m.build('train')
+            self._num_trainable_params = m.num_trainable_params
+            self._saver = m.saver
+        with tf.variable_scope(modelName, reuse=True, use_resource=False):
+            meval = CifarModel(self.hparams)
+            meval.build('eval')
+        return m, meval
+
     def define_teacher(self, images_placeholder, labels_placeholder, global_step, sess, SEED):
 
         print("Define Teacher")
