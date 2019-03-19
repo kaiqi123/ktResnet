@@ -33,63 +33,54 @@ class Resnet(object):
         correct = tf.nn.in_top_k(logits, labels, 1)
         return tf.reduce_sum(tf.cast(correct, tf.int32))
 
-    def do_eval(self, sess, eval_correct, logits, images_placeholder, labels_placeholder, data_input, mode):
+    def do_eval(self, sess, meval, images_placeholder, labels_placeholder, data_input, mode):
 
-            if mode == 'Test':
-                steps_per_epoch = FLAGS.num_testing_examples //FLAGS.batch_size
-                num_examples = steps_per_epoch * FLAGS.batch_size
-            if mode == 'Train':
-                steps_per_epoch = FLAGS.num_training_examples //FLAGS.batch_size
-                num_examples = steps_per_epoch * FLAGS.batch_size
+        eval_correct = self.evaluation(meval.softmax, labels_placeholder)
 
-            true_count = 0
-            for step in xrange(steps_per_epoch):
-                feed_dict, images_feed, labels_feed = self.fill_feed_dict(data_input, images_placeholder, labels_placeholder, sess)
-                count = sess.run(eval_correct, feed_dict=feed_dict)
-                true_count = true_count + count
-            precision = float(true_count) / num_examples
-            print ('Mode is %s, Num examples: %d, Num correct: %d, Precision @ 1: %0.04f' %
-                   (mode, num_examples, true_count, precision))
-            return precision
+        if mode == 'Test':
+            steps_per_epoch = FLAGS.num_testing_examples //FLAGS.batch_size
+            num_examples = steps_per_epoch * FLAGS.batch_size
+        if mode == 'Train':
+            steps_per_epoch = FLAGS.num_training_examples //FLAGS.batch_size
+            num_examples = steps_per_epoch * FLAGS.batch_size
 
-    def _build_models(self, modelName):
+        true_count = 0
+        for step in xrange(steps_per_epoch):
+            feed_dict, images_feed, labels_feed = self.fill_feed_dict(data_input, images_placeholder, labels_placeholder, sess)
+            count = sess.run(eval_correct, feed_dict=feed_dict)
+            true_count = true_count + count
+        precision = float(true_count) / num_examples
+        print ('Mode is %s, Num examples: %d, Num correct: %d, Precision @ 1: %0.04f' %
+               (mode, num_examples, true_count, precision))
+        return precision
+
+    def build_models(self, modelName, images_placeholder):
         with tf.variable_scope(modelName, use_resource=False):
             m = Model(FLAGS.num_channels, SEED)
-            m.build('train')
-            self._num_trainable_params = m.num_trainable_params
-            self._saver = m.saver
+            m = m.build_teacher_model(images_placeholder, FLAGS.num_classes,
+                                                                      Widen_Factor, TeacherModel_N, True)
+            self.saver = tf.train.Saver()
         with tf.variable_scope(modelName, reuse=True, use_resource=False):
-            meval = CifarModel(self.hparams)
-            meval.build('eval')
+            meval = Model(FLAGS.num_channels, SEED)
+            meval = meval.build_teacher_model(images_placeholder, FLAGS.num_classes,
+                                                                    Widen_Factor, TeacherModel_N, False)
         return m, meval
 
-    def define_teacher(self, images_placeholder, labels_placeholder, global_step, sess, SEED):
+    def define_teacher(self, images_placeholder, labels_placeholder, global_step):
 
         print("Define Teacher")
-        mentor_train = Model(FLAGS.num_channels, SEED)
-        mentor_data_dict_train = mentor_train.build_teacher_model(images_placeholder, FLAGS.num_classes,
-                                                            Widen_Factor, TeacherModel_N, True)
 
-        self.loss = mentor_data_dict_train.loss(labels_placeholder)
+        self.m, self.meval = self.build_models("teacherModel", images_placeholder)
+
+        self.loss = self.m.loss(labels_placeholder)
 
         steps_per_epoch = FLAGS.num_examples_per_epoch_for_train / FLAGS.batch_size
         decay_steps = int(steps_per_epoch * Num_Epoch_Per_Decay)
-        lr = tf.train.exponential_decay(FLAGS.learning_rate, global_step, decay_steps, learningRateDecayRatio, staircase=True)
+        self.lr = tf.train.exponential_decay(FLAGS.learning_rate, global_step, decay_steps, learningRateDecayRatio, staircase=True)
         print("Steps_per_epoch: "+str(steps_per_epoch))
         print("Decay_steps: " + str(decay_steps))
 
-        self.train_op = mentor_data_dict_train.training(self.loss, lr, global_step)
-        self.softmax_train = mentor_data_dict_train.softmax
-        self.saver = tf.train.Saver()
-
-        mentor_eval = Model(FLAGS.num_channels, SEED)
-        mentor_data_dict_eval = mentor_eval.build_teacher_model(images_placeholder, FLAGS.num_classes,
-                                                                Widen_Factor, TeacherModel_N, False)
-        self.softmax_eval = mentor_data_dict_eval.softmax
-
-        init = tf.global_variables_initializer()
-        sess.run(init)
-        return lr
+        self.train_op = self.m.training(self.loss, self.lr, global_step)
 
     def save_model(self, session, step=None):
         model_save_name = os.path.join(FLAGS.teacher_model_dir, 'model.ckpt')
@@ -98,13 +89,12 @@ class Resnet(object):
         self.saver.save(session, model_save_name, global_step=step)
         print('Saved model')
 
-    def train_model(self, lr, data_input_train, data_input_test, images_placeholder, labels_placeholder, sess):
+    def train_model(self, data_input_train, data_input_test, images_placeholder, labels_placeholder, sess):
 
         try:
             print('Begin to train model...')
 
-            eval_correct_train = self.evaluation(self.softmax_train, labels_placeholder)
-            eval_correct_eval = self.evaluation(self.softmax_eval, labels_placeholder)
+            eval_correct_train = self.evaluation(self.m.softmax, labels_placeholder)
 
             for i in range(NUM_ITERATIONS):
                 # print("iteration: "+str(i))
@@ -122,12 +112,12 @@ class Resnet(object):
                 if (i) % (FLAGS.num_examples_per_epoch_for_train // FLAGS.batch_size) == 0:
 
                     #self.save_model(sess, step=i)
-                    decayedLearningRate = sess.run(lr)
+                    decayedLearningRate = sess.run(self.lr)
                     DecayedLearningRate_List.append(decayedLearningRate)
                     print ('Decayed learning rate list: ' + str(DecayedLearningRate_List))
 
-                    train_acc = self.do_eval(sess, eval_correct_eval, self.softmax_eval, images_placeholder, labels_placeholder, data_input_test, 'Test')
-                    test_acc = self.do_eval(sess, eval_correct_eval, self.softmax_eval, images_placeholder, labels_placeholder, data_input_train, 'Train')
+                    train_acc = self.do_eval(sess, self.meval, images_placeholder, labels_placeholder, data_input_test, 'Test')
+                    test_acc = self.do_eval(sess, self.meval, images_placeholder, labels_placeholder, data_input_train, 'Train')
                     Test_accuracy_List.append(test_acc)
                     Train_accuracy_List.append(train_acc)
                     tf.logging.info('Train Acc List: {}'.format(Train_accuracy_List))
@@ -179,9 +169,12 @@ class Resnet(object):
             print("Widen_Factor: " + str(Widen_Factor))
 
             if FLAGS.teacher:
-                lr = self.define_teacher(images_placeholder, labels_placeholder, global_step, sess, SEED)
+                self.define_teacher(images_placeholder, labels_placeholder, global_step)
 
-            self.train_model(lr, data_input_train, data_input_test, images_placeholder, labels_placeholder, sess)
+            init = tf.global_variables_initializer()
+            sess.run(init)
+
+            self.train_model(data_input_train, data_input_test, images_placeholder, labels_placeholder, sess)
 
             tf.logging.info('Train Acc List: {}'.format(Train_accuracy_List))
             tf.logging.info('Test Acc List: {}'.format(Test_accuracy_List))
