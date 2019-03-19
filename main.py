@@ -162,18 +162,18 @@ class Resnet(object):
             global_step = tf.Variable(0, name='global_step', trainable=False)
             #phase_train = tf.placeholder(tf.bool, name='phase_train')
 
+            if FLAGS.teacher:
+                self.define_teacher(images_placeholder, labels_placeholder, global_step)
+
+            init = tf.global_variables_initializer()
+            sess.run(init)
+
             print("NUM_ITERATIONS: " + str(NUM_ITERATIONS))
             print("learning_rate: " + str(FLAGS.learning_rate))
             print("batch_size: " + str(FLAGS.batch_size))
             print("Depth: " + str(Depth))
             print("TeacherModel_N: " + str(TeacherModel_N))
             print("Widen_Factor: " + str(Widen_Factor))
-
-            if FLAGS.teacher:
-                self.define_teacher(images_placeholder, labels_placeholder, global_step)
-
-            init = tf.global_variables_initializer()
-            sess.run(init)
 
             self.train_model(data_input_train, data_input_test, images_placeholder, labels_placeholder, sess)
 
