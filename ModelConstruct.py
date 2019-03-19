@@ -20,7 +20,7 @@ class Model(object):
         #self.bn = self.batch_norm()
 
     def conv2d(self, imgInput, nInputPlane, nOutputPlane, stride, padding):
-        with tf.name_scope('Convolution') as scope:
+        with tf.variable_scope('conv'):
             imgInput = tf.pad(imgInput, [[0, 0], [padding, padding], [padding, padding], [0, 0]])
             kernel = tf.Variable(tf.truncated_normal([3, 3, nInputPlane, nOutputPlane], dtype=tf.float32, stddev=1e-2, seed=self.seed), trainable=self.trainable, name='conv_kernel')
             conv = tf.nn.conv2d(imgInput, filter=kernel, strides=[1, stride, stride, 1], padding='VALID', name="conv")
@@ -28,7 +28,7 @@ class Model(object):
         return conv
 
     def conv2d_dim(self, imgInput, nInputPlane, nOutputPlane, stride, padding):
-        with tf.name_scope('Convolution_dim') as scope:
+        with tf.variable_scope('conv_dim'):
             imgInput = tf.pad(imgInput, [[0, 0], [padding, padding], [padding, padding], [0, 0]])
             kernel = tf.Variable(tf.truncated_normal([1, 1, nInputPlane, nOutputPlane], dtype=tf.float32, stddev=1e-2, seed=self.seed), trainable=self.trainable, name='conv_kernel')
             conv = tf.nn.conv2d(imgInput, filter=kernel, strides=[1, stride, stride, 1], padding='VALID', name="conv_dim")
@@ -36,7 +36,7 @@ class Model(object):
         return conv
 
     def FullyConnect(self, imgInput, nOutputPlane):
-        with tf.name_scope('FullyConnect') as scope:
+        with tf.variable_scope('fc'):
             shape = int(np.prod(imgInput.get_shape()[1:]))
             fcw = tf.Variable(tf.truncated_normal([shape, nOutputPlane], dtype=tf.float32, stddev=1e-2, seed=self.seed), trainable=self.trainable, name='weights')
             fcb = tf.Variable(tf.constant(0.0, shape=[nOutputPlane], dtype=tf.float32), trainable=self.trainable, name='biases')
