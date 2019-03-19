@@ -55,16 +55,16 @@ class Resnet(object):
         return precision
 
     def build_models(self, modelName, images_placeholder):
-        with tf.variable_scope(modelName, use_resource=False):
-            m = Model(FLAGS.num_channels, SEED)
-            m = m.build_teacher_model(images_placeholder, FLAGS.num_classes,
-                                                                      Widen_Factor, TeacherModel_N, True)
-            self.saver = tf.train.Saver()
+        #with tf.variable_scope(modelName, use_resource=False):
+        m = Model(FLAGS.num_channels, SEED)
+        m = m.build_teacher_model(images_placeholder, FLAGS.num_classes,
+                                                                  Widen_Factor, TeacherModel_N, True)
+        self.saver = tf.train.Saver()
 
-        with tf.variable_scope(modelName, reuse=True, use_resource=False):
-            meval = Model(FLAGS.num_channels, SEED)
-            meval = meval.build_teacher_model(images_placeholder, FLAGS.num_classes,
-                                                                    Widen_Factor, TeacherModel_N, False)
+        #with tf.variable_scope(modelName, reuse=True, use_resource=False):
+        meval = Model(FLAGS.num_channels, SEED)
+        meval = meval.build_teacher_model(images_placeholder, FLAGS.num_classes,
+                                                                Widen_Factor, TeacherModel_N, False)
         return m, meval
 
     def define_teacher(self, images_placeholder, labels_placeholder, global_step):
