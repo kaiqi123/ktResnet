@@ -46,30 +46,39 @@ class Model(object):
             print(fcb)
         return imgOutput
 
-    def batch_norm(self,x, phase_train):
+    def batch_norm(self, x, phase_train, scope):
 
-        with tf.name_scope('bn') as scope:
+        with tf.name_scope(scope+'.bn') as scope:
+
+            if phase_train:
+                reuse_flag = False
+            else:
+                reuse_flag = True
 
             weight = tf.random_normal_initializer(mean=1, stddev=0.045)
             bias = tf.constant_initializer(value=0)
             moving_mean = tf.constant_initializer(value=0)
             moving_variance = tf.ones_initializer()
 
-
-            bn = tf.contrib.layers.batch_norm(x, trainable=True, is_training=phase_train,
-                                              updates_collections=tf.GraphKeys.UPDATE_OPS,
-                                              param_initializers={
-                                                  'beta': bias,
-                                                  'gamma': weight,
-                                                  'moving_mean': moving_mean,
-                                                  'moving_variance': moving_variance})
-            """
-            bn = tf.keras.layers.BatchNormalization(axis=-1, name='BatchNorm', trainable=self.trainable,
-                                           beta_initializer=bias,
-                                           gamma_initializer=weight,
-                                           moving_mean_initializer=moving_mean,
-                                           moving_variance_initializer=moving_variance)
-            """
+            bn = tf.contrib.layers.batch_norm(
+                x,
+                decay=0.9,
+                center=True,
+                scale=True,
+                epsilon=1e-5,
+                activation_fn=None,
+                param_initializers={'beta': bias,
+                                    'gamma': weight,
+                                    'moving_mean': moving_mean,
+                                    'moving_variance': moving_variance},
+                updates_collections=tf.GraphKeys.UPDATE_OPS,
+                is_training=phase_train,
+                reuse=reuse_flag,
+                trainable=True,
+                fused=True,
+                data_format='NHWC',
+                zero_debias_moving_mean=False,
+                scope=scope)
 
             print(weight)
             print(bias)
@@ -77,18 +86,17 @@ class Model(object):
             print(moving_variance)
         return bn
 
-
-    def basic_block(self, imgInput, nInputPlane, nOutputPlane, stride, mode):
+    def basic_block(self, imgInput, nInputPlane, nOutputPlane, stride, mode, scope):
 
         print("basic_block")
 
-        with tf.name_scope('block_conv1') as scope:
-            o1 = tf.nn.relu(self.batch_norm(imgInput, mode), name='relu')
+        with tf.name_scope(scope +'.block_conv1') as scope0:
+            o1 = tf.nn.relu(self.batch_norm(imgInput, mode, scope0), name='relu')
             y = self.conv2d(o1, nInputPlane, nOutputPlane, stride=stride, padding=1)
             print(y)
 
-        with tf.name_scope('block_conv2') as scope:
-            o2 = tf.nn.relu(self.batch_norm(y, mode), name='relu')
+        with tf.name_scope(scope +'.block_conv2') as scope1:
+            o2 = tf.nn.relu(self.batch_norm(y, mode, scope1), name='relu')
             # dropout = tf.nn.dropout(relu, 0.3, seed=self.seed)
             z = self.conv2d(o2, nOutputPlane, nOutputPlane, stride=1, padding=1)
             #print(z)
@@ -101,13 +109,13 @@ class Model(object):
 
         return output
 
-    def group(self, imgInput, nInputPlane, nOutputPlane, n, stride, mode):
-        print("group")
-        with tf.name_scope('group1') as scope:
-            block = self.basic_block(imgInput, nInputPlane, nOutputPlane, stride, mode)
+    def group(self, imgInput, nInputPlane, nOutputPlane, n, stride, mode, scope):
+        print(scope)
+        with tf.name_scope(scope) as scope:
+            block = self.basic_block(imgInput, nInputPlane, nOutputPlane, stride, mode, scope)
             for i in range(n - 1):
                 x = block
-                block = self.basic_block(x, nOutputPlane, nOutputPlane, 1, mode)
+                block = self.basic_block(x, nOutputPlane, nOutputPlane, 1, mode, scope)
         return block
 
     def build_teacher_model(self, rgb, num_classes, k, n, mode):
@@ -117,11 +125,11 @@ class Model(object):
         nStages = [16, 16 * k, 32 * k, 64 * k]
 
         x = self.conv2d(rgb, self.num_channels, nStages[0], stride=1, padding=1)
-        g0 = self.group(x, nStages[0], nStages[1], n, 1, mode)
-        g1 = self.group(g0, nStages[1], nStages[2], n, 2, mode)
-        g2 = self.group(g1, nStages[2], nStages[3], n, 2, mode)
+        g0 = self.group(x, nStages[0], nStages[1], n, 1, mode, scope='group0')
+        g1 = self.group(g0, nStages[1], nStages[2], n, 2, mode, scope='group1')
+        g2 = self.group(g1, nStages[2], nStages[3], n, 2, mode, scope='group2')
 
-        relu = tf.nn.relu(self.batch_norm(g2, mode), name='relu')
+        relu = tf.nn.relu(self.batch_norm(g2, mode, 'afterGroup'), name='relu')
         averagePool = tf.nn.avg_pool(relu, ksize=[1, 8, 8, 1], strides=[1, 1, 1, 1], padding='VALID', name='averagePool')
         self.fc = self.FullyConnect(averagePool, num_classes)
         self.softmax = tf.nn.softmax(self.fc)
@@ -134,12 +142,14 @@ class Model(object):
 
     def training(self, loss, learning_rate, global_step):
 
-        print("111111111")
+        print("Define training.....................................................")
         #print(self.bn)
         #print(self.bn.updates)
-        update_ops = tf.get_collection(tf.GraphKeys.UPDATE_OPS)
         optimizer = tf.contrib.opt.MomentumWOptimizer(weight_decay=0.0005, learning_rate=learning_rate, momentum=0.9, use_nesterov=True)
-        train_op = optimizer.minimize(loss, global_step=global_step)
+        apply_op = optimizer.minimize(loss, global_step=global_step)
+        train_ops = tf.get_collection(tf.GraphKeys.UPDATE_OPS)
+        with tf.control_dependencies([apply_op]):
+            train_op = tf.group(*train_ops)
         #train_op = tf.group([train_op, update_ops])
 
         """
@@ -161,7 +171,7 @@ class Model(object):
         #    print(e)
         """
 
-        return train_op,update_ops
+        return train_op
 
 
 

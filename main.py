@@ -6,6 +6,7 @@ from ModelConstruct import Model
 import time
 import sys
 import argparse
+import os
 from tensorflow.python.client import device_lib
 
 tf.reset_default_graph()
@@ -23,45 +24,16 @@ DecayedLearningRate_List = []
 
 class Resnet(object):
 
-    def fill_feed_dict(self, data_input, images_pl, labels_pl, sess, mode, phase_train):
-
+    def fill_feed_dict(self, data_input, images_pl, labels_pl, sess):
         images_feed, labels_feed = sess.run([data_input.example_batch, data_input.label_batch])
-
-        if mode == 'Train':
-            feed_dict = {
-                images_pl: images_feed,
-                labels_pl: labels_feed,
-                phase_train: True
-            }
-
-        if mode == 'Test':
-            feed_dict = {
-                images_pl: images_feed,
-                labels_pl: labels_feed,
-                phase_train: False
-            }
-
-        if mode == 'Validation':
-            feed_dict = {
-                images_pl: images_feed,
-                labels_pl: labels_feed,
-                phase_train: False
-            }
+        feed_dict = {images_pl: images_feed, labels_pl: labels_feed}
         return feed_dict, images_feed, labels_feed
 
     def evaluation(self, logits, labels):
-
-        if FLAGS.top_1_accuracy:
-            print('evaluation: top 1 accuracy ')
-            correct = tf.nn.in_top_k(logits, labels, 1)
-        elif FLAGS.top_3_accuracy:
-            correct = tf.nn.in_top_k(logits, labels, 3)
-        elif FLAGS.top_5_accuracy:
-            correct = tf.nn.in_top_k(logits, labels, 5)
-
+        correct = tf.nn.in_top_k(logits, labels, 1)
         return tf.reduce_sum(tf.cast(correct, tf.int32))
 
-    def do_eval(self, sess, eval_correct, logits, images_placeholder, labels_placeholder, dataset, mode, phase_train):
+    def do_eval(self, sess, eval_correct, logits, images_placeholder, labels_placeholder, data_input, mode):
 
             if mode == 'Test':
                 steps_per_epoch = FLAGS.num_testing_examples //FLAGS.batch_size
@@ -69,31 +41,25 @@ class Resnet(object):
             if mode == 'Train':
                 steps_per_epoch = FLAGS.num_training_examples //FLAGS.batch_size
                 num_examples = steps_per_epoch * FLAGS.batch_size
-            if mode == 'Validation':
-                steps_per_epoch = FLAGS.num_validation_examples //FLAGS.batch_size
-                num_examples = steps_per_epoch * FLAGS.batch_size
 
             true_count = 0
             for step in xrange(steps_per_epoch):
-                feed_dict, images_feed, labels_feed = self.fill_feed_dict(dataset, images_placeholder, labels_placeholder, sess, mode, phase_train)
+                feed_dict, images_feed, labels_feed = self.fill_feed_dict(data_input, images_placeholder, labels_placeholder, sess)
                 count = sess.run(eval_correct, feed_dict=feed_dict)
                 true_count = true_count + count
-
             precision = float(true_count) / num_examples
-            print ('  Num examples: %d, Num correct: %d, Precision @ 1: %0.04f' %
-                            (num_examples, true_count, precision))
-
+            print ('Mode is %s, Num examples: %d, Num correct: %d, Precision @ 1: %0.04f' %
+                   (mode, num_examples, true_count, precision))
             return precision
 
-    def define_teacher(self, images_placeholder, labels_placeholder, global_step, sess, SEED, phase_train):
+    def define_teacher(self, images_placeholder, labels_placeholder, global_step, sess, SEED):
 
         print("Define Teacher")
-        mentor = Model(FLAGS.num_channels, SEED)
-        mentor_data_dict = mentor.build_teacher_model(images_placeholder, FLAGS.num_classes, Widen_Factor,
-                                                      TeacherModel_N, phase_train)
-        # mentor_data_dict = mentor.build_teacher_model(images_placeholder, TeacherModel_N, phase_train)
+        mentor_train = Model(FLAGS.num_channels, SEED)
+        mentor_data_dict_train = mentor_train.build_teacher_model(images_placeholder, FLAGS.num_classes,
+                                                            Widen_Factor, TeacherModel_N, True)
 
-        self.loss = mentor.loss(labels_placeholder)
+        self.loss = mentor_data_dict_train.loss(labels_placeholder)
 
         steps_per_epoch = FLAGS.num_examples_per_epoch_for_train / FLAGS.batch_size
         decay_steps = int(steps_per_epoch * Num_Epoch_Per_Decay)
@@ -101,79 +67,60 @@ class Resnet(object):
         print("Steps_per_epoch: "+str(steps_per_epoch))
         print("Decay_steps: " + str(decay_steps))
 
-        #lr = tf.convert_to_tensor(FLAGS.learning_rate, dtype=tf.float32)
-        #print("learning_rate is(not decay): ", lr)
+        self.train_op = mentor_data_dict_train.training(self.loss, lr, global_step)
+        self.softmax_train = mentor_data_dict_train.softmax
+        self.saver = tf.train.Saver()
 
-        self.train_op, self.update_ops = mentor.training(self.loss, lr, global_step)
-        self.softmax = mentor_data_dict.softmax
+        mentor_eval = Model(FLAGS.num_channels, SEED)
+        mentor_data_dict_eval = mentor_eval.build_teacher_model(images_placeholder, FLAGS.num_classes,
+                                                                Widen_Factor, TeacherModel_N, False)
+        self.softmax_eval = mentor_data_dict_eval.softmax
 
         init = tf.global_variables_initializer()
         sess.run(init)
-        self.saver = tf.train.Saver()
         return lr
 
-    def train_model(self, lr, data_input_train, data_input_test, images_placeholder, labels_placeholder, sess, phase_train):
+    def save_model(self, session, step=None):
+        model_save_name = os.path.join(FLAGS.teacher_model_dir, 'model.ckpt')
+        if not tf.gfile.IsDirectory(FLAGS.teacher_model_dir):
+            tf.gfile.MakeDirs(FLAGS.teacher_model_dir)
+        self.saver.save(session, model_save_name, global_step=step)
+        print('Saved model')
+
+    def train_model(self, lr, data_input_train, data_input_test, images_placeholder, labels_placeholder, sess):
 
         try:
             print('Begin to train model...')
 
-            eval_correct = self.evaluation(self.softmax, labels_placeholder)
+            eval_correct_train = self.evaluation(self.softmax_train, labels_placeholder)
+            eval_correct_eval = self.evaluation(self.softmax_eval, labels_placeholder)
 
-            train_count = 0
             for i in range(NUM_ITERATIONS):
-
                 # print("iteration: "+str(i))
-
-                feed_dict, images_feed, labels_feed = self.fill_feed_dict(data_input_train, images_placeholder,
-                                                                          labels_placeholder, sess, 'Train',
-                                                                          phase_train)
+                feed_dict, images_feed, labels_feed = self.fill_feed_dict(data_input_train,
+                                                                          images_placeholder, labels_placeholder, sess)
 
                 if FLAGS.teacher or FLAGS.student:
                     # print("train function: independent student or teacher")
-                    _, _, loss_value, train_count_per_batch = sess.run([self.train_op, self.update_ops, self.loss, eval_correct], feed_dict=feed_dict)
-                    train_count = train_count + train_count_per_batch
-                    #print(train_count_per_batch,FLAGS.batch_size, train_acc)
+                    _, loss_value, train_count_per_batch = sess.run([self.train_op, self.loss, eval_correct_train], feed_dict=feed_dict)
+                    train_acc_per_iteration = float(train_count_per_batch) / FLAGS.batch_size
 
-                    if i % 10 == 0:
-                        print ('Step %d: loss_value = %.20f' % (i, loss_value))
+                    if i % 20 == 0:
+                        print ('Step %d: loss_value = %.20f, train_acc = %.20f' % (i, loss_value, train_acc_per_iteration))
 
-                if (i) % (FLAGS.num_examples_per_epoch_for_train // FLAGS.batch_size) == 0 or (i) == NUM_ITERATIONS - 1:
+                if (i) % (FLAGS.num_examples_per_epoch_for_train // FLAGS.batch_size) == 0:
 
+                    #self.save_model(sess, step=i)
                     decayedLearningRate = sess.run(lr)
                     DecayedLearningRate_List.append(decayedLearningRate)
                     print ('Decayed learning rate list: ' + str(DecayedLearningRate_List))
 
-                    print ("Training Data Eval:")
-                    steps_per_epoch = FLAGS.num_training_examples // FLAGS.batch_size
-                    num_examples = steps_per_epoch * FLAGS.batch_size
-                    train_acc = float(train_count) / num_examples
-                    Train_accuracy_List.append(train_acc)
-                    train_count = 0
-                    #train_acc = self.do_eval(sess, eval_correct, self.softmax, images_placeholder, labels_placeholder, data_input_train,'Train', phase_train)
-                    #Train_accuracy_List.append(train_acc)
-                    print(Train_accuracy_List)
-                    print ("max train accuracy % f", max(Train_accuracy_List))
-
-                    print("----------------------------------------------------------")
-
-                    print ("Test  Data Eval:")
-                    test_acc = self.do_eval(sess, eval_correct, self.softmax, images_placeholder, labels_placeholder, data_input_test, 'Test', phase_train)
+                    train_acc = self.do_eval(sess, eval_correct_eval, self.softmax_eval, images_placeholder, labels_placeholder, data_input_test, 'Test')
+                    test_acc = self.do_eval(sess, eval_correct_eval, self.softmax_eval, images_placeholder, labels_placeholder, data_input_train, 'Train')
                     Test_accuracy_List.append(test_acc)
-                    print(Test_accuracy_List)
-                    print ("max test accuracy % f", max(Test_accuracy_List))
-                    
-                    if FLAGS.teacher:
-                        print("save teacher to: " + str(FLAGS.teacher_weights_filename))
-                        self.saver.save(sess, FLAGS.teacher_weights_filename)
-    
-                        f = open("output/teacher_train_" + str(FLAGS.learning_rate), "w")
-                        f.writelines([str(e) + "," for e in Train_accuracy_List])
-    
-                        f1 = open("output/teacher_test_" + str(FLAGS.learning_rate), "w")
-                        f1.writelines([str(e) + "," for e in Test_accuracy_List])
-    
-                        f2 = open("output/teacher_decayedLearningRate", "w")
-                        f2.writelines([str(e) + "," for e in DecayedLearningRate_List])
+                    Train_accuracy_List.append(train_acc)
+                    tf.logging.info('Train Acc List: {}'.format(Train_accuracy_List))
+                    tf.logging.info('Test Acc List: {}'.format(Test_accuracy_List))
 
         except Exception as e:
             print(e)
@@ -192,10 +139,10 @@ class Resnet(object):
             tf.set_random_seed(SEED)
 
             data_input_train = DataInput(FLAGS.train_dataset, FLAGS.batch_size, FLAGS.image_width, FLAGS.image_height,
-                      FLAGS.num_channels, SEED, Pad, FLAGS.datasetName, True)
+                      FLAGS.num_channels, SEED, Pad, FLAGS.datasetName)
 
             data_input_test = DataInput(FLAGS.test_dataset, FLAGS.batch_size, FLAGS.image_width, FLAGS.image_height,
-                                        FLAGS.num_channels, SEED, Pad, FLAGS.datasetName, False)
+                                        FLAGS.num_channels, SEED, Pad, FLAGS.datasetName)
 
             images_placeholder = tf.placeholder(tf.float32,
                                                 shape=(FLAGS.batch_size, FLAGS.image_height,
@@ -211,7 +158,7 @@ class Resnet(object):
             coord = tf.train.Coordinator()
             threads = tf.train.start_queue_runners(sess=sess, coord=coord)
             global_step = tf.Variable(0, name='global_step', trainable=False)
-            phase_train = tf.placeholder(tf.bool, name='phase_train')
+            #phase_train = tf.placeholder(tf.bool, name='phase_train')
 
             print("NUM_ITERATIONS: " + str(NUM_ITERATIONS))
             print("learning_rate: " + str(FLAGS.learning_rate))
@@ -221,18 +168,19 @@ class Resnet(object):
             print("Widen_Factor: " + str(Widen_Factor))
 
             if FLAGS.teacher:
-                lr = self.define_teacher(images_placeholder, labels_placeholder, global_step, sess, SEED, phase_train)
+                lr = self.define_teacher(images_placeholder, labels_placeholder, global_step, sess, SEED)
 
-            self.train_model(lr, data_input_train, data_input_test, images_placeholder, labels_placeholder, sess, phase_train)
+            self.train_model(lr, data_input_train, data_input_test, images_placeholder, labels_placeholder, sess)
 
-            print(Test_accuracy_List)
-            writer_tensorboard = tf.summary.FileWriter('tensorboard/', sess.graph)
+            tf.logging.info('Train Acc List: {}'.format(Train_accuracy_List))
+            tf.logging.info('Test Acc List: {}'.format(Test_accuracy_List))
+            #writer_tensorboard = tf.summary.FileWriter('tensorboard/', sess.graph)
 
             coord.request_stop()
             coord.join(threads)
 
         sess.close()
-        writer_tensorboard.close()
+        #writer_tensorboard.close()
 
         end_time = time.time()
         runtime = round((end_time - start_time) / (60 * 60), 2)
@@ -243,7 +191,6 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--teacher', type=bool, help='train teacher', default=False)
     parser.add_argument('--student', type=bool, help='train independent student', default=False)
-    parser.add_argument('--teacher_weights_filename', type=str, default="./summary-log/teacher_weights_filename_cifar10")
     parser.add_argument('--learning_rate', type=float, default=0.1)
     parser.add_argument('--batch_size', type=int, default=128)
     parser.add_argument('--image_height', type=int, default=32)
@@ -255,9 +202,9 @@ if __name__ == '__main__':
     parser.add_argument('--num_testing_examples',type=int,default=10000)
     parser.add_argument('--datasetName', type=str, help='name of the dataset', default='cifar10')
     parser.add_argument('--num_channels', type=int, default='3')
-    parser.add_argument('--top_1_accuracy', type=bool, help='top-1-accuracy', default=True)
     parser.add_argument('--num_optimizers', type=int, help='number of mapping layers from teacher', default=1)
     parser.add_argument('--num_examples_per_epoch_for_train', type=int, default=50000)
+    #parser.add_argument('--teacher_model_dir', type=str, default="./summary-log/teacher/")
     FLAGS, unparsed = parser.parse_known_args()
     ex = Resnet()
     tf.app.run(main=ex.main, argv=[sys.argv[0]] + unparsed)
