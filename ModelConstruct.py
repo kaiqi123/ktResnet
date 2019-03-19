@@ -87,23 +87,24 @@ class Model(object):
     def basic_block(self, imgInput, nInputPlane, nOutputPlane, stride, mode, scope):
 
         print("basic_block")
+        with tf.variable_scope(scope):
 
-        with tf.variable_scope('sub_block0'):
-            o1 = tf.nn.relu(self.batch_norm(imgInput, mode, 'bn0'), name='relu')
-            y = self.conv2d(o1, nInputPlane, nOutputPlane, stride=stride, padding=1)
-            print(y)
+            with tf.variable_scope('sub_block0'):
+                o1 = tf.nn.relu(self.batch_norm(imgInput, mode, 'bn0'), name='relu')
+                y = self.conv2d(o1, nInputPlane, nOutputPlane, stride=stride, padding=1)
+                print(y)
 
-        with tf.variable_scope('sub_block1'):
-            o2 = tf.nn.relu(self.batch_norm(y, mode, 'bn1'), name='relu')
-            # dropout = tf.nn.dropout(relu, 0.3, seed=self.seed)
-            z = self.conv2d(o2, nOutputPlane, nOutputPlane, stride=1, padding=1)
-            #print(z)
+            with tf.variable_scope('sub_block1'):
+                o2 = tf.nn.relu(self.batch_norm(y, mode, 'bn1'), name='relu')
+                # dropout = tf.nn.dropout(relu, 0.3, seed=self.seed)
+                z = self.conv2d(o2, nOutputPlane, nOutputPlane, stride=1, padding=1)
+                #print(z)
 
-        if nInputPlane != nOutputPlane:
-            output = z + self.conv2d_dim(o1, nInputPlane, nOutputPlane, stride=stride, padding=0)
-        else:
-            output = z + imgInput
-        # print(output)
+            if nInputPlane != nOutputPlane:
+                output = z + self.conv2d_dim(o1, nInputPlane, nOutputPlane, stride=stride, padding=0)
+            else:
+                output = z + imgInput
+            # print(output)
 
         return output
 
