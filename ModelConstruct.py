@@ -48,55 +48,53 @@ class Model(object):
 
     def batch_norm(self, x, phase_train, scope):
 
-        with tf.name_scope(scope+'.bn') as scope:
+        if phase_train:
+            reuse_flag = False
+        else:
+            reuse_flag = True
 
-            if phase_train:
-                reuse_flag = False
-            else:
-                reuse_flag = True
+        weight = tf.random_normal_initializer(mean=1, stddev=0.045)
+        bias = tf.constant_initializer(value=0)
+        moving_mean = tf.constant_initializer(value=0)
+        moving_variance = tf.ones_initializer()
 
-            weight = tf.random_normal_initializer(mean=1, stddev=0.045)
-            bias = tf.constant_initializer(value=0)
-            moving_mean = tf.constant_initializer(value=0)
-            moving_variance = tf.ones_initializer()
+        bn = tf.contrib.layers.batch_norm(
+            x,
+            decay=0.9,
+            center=True,
+            scale=True,
+            epsilon=1e-5,
+            activation_fn=None,
+            param_initializers={'beta': bias,
+                                'gamma': weight,
+                                'moving_mean': moving_mean,
+                                'moving_variance': moving_variance},
+            updates_collections=tf.GraphKeys.UPDATE_OPS,
+            is_training=phase_train,
+            reuse=reuse_flag,
+            trainable=True,
+            fused=True,
+            data_format='NHWC',
+            zero_debias_moving_mean=False,
+            scope=scope)
 
-            bn = tf.contrib.layers.batch_norm(
-                x,
-                decay=0.9,
-                center=True,
-                scale=True,
-                epsilon=1e-5,
-                activation_fn=None,
-                param_initializers={'beta': bias,
-                                    'gamma': weight,
-                                    'moving_mean': moving_mean,
-                                    'moving_variance': moving_variance},
-                updates_collections=tf.GraphKeys.UPDATE_OPS,
-                is_training=phase_train,
-                reuse=reuse_flag,
-                trainable=True,
-                fused=True,
-                data_format='NHWC',
-                zero_debias_moving_mean=False,
-                scope=scope)
-
-            print(weight)
-            print(bias)
-            print(moving_mean)
-            print(moving_variance)
+        print(weight)
+        print(bias)
+        print(moving_mean)
+        print(moving_variance)
         return bn
 
-    def basic_block(self, imgInput, nInputPlane, nOutputPlane, stride, mode, scope):
+    def basic_block(self, imgInput, nInputPlane, nOutputPlane, stride, mode):
 
         print("basic_block")
 
-        with tf.name_scope(scope +'.block_conv1') as scope0:
-            o1 = tf.nn.relu(self.batch_norm(imgInput, mode, scope0), name='relu')
+        with tf.variable_scope('block_conv1'):
+            o1 = tf.nn.relu(self.batch_norm(imgInput, mode, 'bn0'), name='relu')
             y = self.conv2d(o1, nInputPlane, nOutputPlane, stride=stride, padding=1)
             print(y)
 
-        with tf.name_scope(scope +'.block_conv2') as scope1:
-            o2 = tf.nn.relu(self.batch_norm(y, mode, scope1), name='relu')
+        with tf.variable_scope('block_conv2'):
+            o2 = tf.nn.relu(self.batch_norm(y, mode, 'bn1'), name='relu')
             # dropout = tf.nn.dropout(relu, 0.3, seed=self.seed)
             z = self.conv2d(o2, nOutputPlane, nOutputPlane, stride=1, padding=1)
             #print(z)
@@ -111,11 +109,11 @@ class Model(object):
 
     def group(self, imgInput, nInputPlane, nOutputPlane, n, stride, mode, scope):
         print(scope)
-        with tf.name_scope(scope) as scope:
-            block = self.basic_block(imgInput, nInputPlane, nOutputPlane, stride, mode, scope)
+        with tf.variable_scope(scope):
+            block = self.basic_block(imgInput, nInputPlane, nOutputPlane, stride, mode)
             for i in range(n - 1):
                 x = block
-                block = self.basic_block(x, nOutputPlane, nOutputPlane, 1, mode, scope)
+                block = self.basic_block(x, nOutputPlane, nOutputPlane, 1, mode)
         return block
 
     def build_teacher_model(self, rgb, num_classes, k, n, mode):
@@ -129,7 +127,7 @@ class Model(object):
         g1 = self.group(g0, nStages[1], nStages[2], n, 2, mode, scope='group1')
         g2 = self.group(g1, nStages[2], nStages[3], n, 2, mode, scope='group2')
 
-        relu = tf.nn.relu(self.batch_norm(g2, mode, 'afterGroup'), name='relu')
+        relu = tf.nn.relu(self.batch_norm(g2, mode, 'afterGroupBn3'), name='relu')
         averagePool = tf.nn.avg_pool(relu, ksize=[1, 8, 8, 1], strides=[1, 1, 1, 1], padding='VALID', name='averagePool')
         self.fc = self.FullyConnect(averagePool, num_classes)
         self.softmax = tf.nn.softmax(self.fc)
